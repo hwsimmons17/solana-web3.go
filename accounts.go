@@ -7,24 +7,25 @@ const BASE_ACCOUNT_SIZE = 128
 
 // Describe the generic account details applicable to every account.
 type BaseAccount struct {
-	Executable     bool
-	Lamports       int
-	ProgramAddress Address
-	Space          int
+	Executable bool    `json:"executable"`
+	Lamports   uint    `json:"lamports"`
+	Owner      Address `json:"owner"`
+	RentEpoch  uint64  `json:"rentEpoch"`
+	Space      int     `json:"space"`
 }
 
 // Defines a Solana account with its generic details or encoded data.
 type Account[T any] struct {
-	Address    Address
-	Data       []byte
-	ParsedData T
+	Address    Address `json:"address"`
+	Data       []byte  `json:"data"`
+	ParsedData T       `json:"parsedData"`
 	BaseAccount
 }
 
 // Defines a Solana account with its generic details and encoded data.
 type EncodedAccount struct {
-	Address Address
-	Data    []byte
+	Address Address `json:"address"`
+	Data    []byte  `json:"data"`
 	BaseAccount
 }
 
