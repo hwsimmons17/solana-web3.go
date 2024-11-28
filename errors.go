@@ -1,0 +1,375 @@
+package solana
+
+// /**
+//  * To add a new error, follow the instructions at
+//  * https://github.com/solana-labs/solana-web3.js/tree/master/packages/errors/#adding-a-new-error
+//  *
+//  * WARNING:
+//  *   - Don't remove error codes
+//  *   - Don't change or reorder error codes.
+//  *
+//  * Good naming conventions:
+//  *   - Prefixing common errors — e.g. under the same package — can be a good way to namespace them. E.g. All codec-related errors start with `SOLANA_ERROR__CODECS__`.
+//  *   - Use consistent names — e.g. choose `PDA` or `PROGRAM_DERIVED_ADDRESS` and stick with it. Ensure your names are consistent with existing error codes. The decision might have been made for you.
+//  *   - Recommended prefixes and suffixes:
+//  *     - `MALFORMED_`: Some input was not constructed properly. E.g. `MALFORMED_BASE58_ENCODED_ADDRESS`.
+//  *     - `INVALID_`: Some input is invalid (other than because it was MALFORMED). E.g. `INVALID_NUMBER_OF_BYTES`.
+//  *     - `EXPECTED_`: Some input was different than expected, no need to specify the "GOT" part unless necessary. E.g. `EXPECTED_DECODED_ACCOUNT`.
+//  *     - `_CANNOT_`: Some operation cannot be performed or some input cannot be used due to some condition. E.g. `CANNOT_DECODE_EMPTY_BYTE_ARRAY` or `PDA_CANNOT_END_WITH_PDA_MARKER`.
+//  *     - `_MUST_BE_`: Some condition must be true. E.g. `NONCE_TRANSACTION_FIRST_INSTRUCTION_MUST_BE_ADVANCE_NONCE`.
+//  *     - `_FAILED_TO_`: Tried to perform some operation and failed. E.g. `FAILED_TO_DECODE_ACCOUNT`.
+//  *     - `_NOT_FOUND`: Some operation lead to not finding something. E.g. `ACCOUNT_NOT_FOUND`.
+//  *     - `_OUT_OF_RANGE`: Some value is out of range. E.g. `ENUM_DISCRIMINATOR_OUT_OF_RANGE`.
+//  *     - `_EXCEEDED`: Some limit was exceeded. E.g. `PDA_MAX_SEED_LENGTH_EXCEEDED`.
+//  *     - `_MISMATCH`: Some elements do not match. E.g. `ENCODER_DECODER_FIXED_SIZE_MISMATCH`.
+//  *     - `_MISSING`: Some required input is missing. E.g. `TRANSACTION_FEE_PAYER_MISSING`.
+//  *     - `_UNIMPLEMENTED`: Some required component is not available in the environment. E.g. `SUBTLE_CRYPTO_VERIFY_FUNCTION_UNIMPLEMENTED`.
+//  */
+// type ErrorCode error
+
+// const (
+// 	SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED                ErrorCode = 1
+// 	SOLANA_ERROR__INVALID_NONCE                        ErrorCode = 2
+// 	SOLANA_ERROR__NONCE_ACCOUNT_NOT_FOUND              ErrorCode = 3
+// 	SOLANA_ERROR__BLOCKHASH_STRING_LENGTH_OUT_OF_RANGE ErrorCode = 4
+// 	SOLANA_ERROR__INVALID_BLOCKHASH_BYTE_LENGTH        ErrorCode = 5
+// 	SOLANA_ERROR__LAMPORTS_OUT_OF_RANGE                ErrorCode = 6
+// 	SOLANA_ERROR__MALFORMED_BIGINT_STRING              ErrorCode = 7
+// 	SOLANA_ERROR__MALFORMED_NUMBER_STRING              ErrorCode = 8
+// 	SOLANA_ERROR__TIMESTAMP_OUT_OF_RANGE               ErrorCode = 9
+// )
+
+// // JSON-RPC-related errors.
+// // Reserve error codes in the range [-32768, -32000]
+// // Keep in sync with https://github.com/anza-xyz/agave/blob/master/rpc-client-api/src/custom_error.rs
+// const (
+// 	SOLANA_ERROR__JSON_RPC__PARSE_ERROR                                              ErrorCode = -32700
+// 	SOLANA_ERROR__JSON_RPC__INTERNAL_ERROR                                           ErrorCode = -32603
+// 	SOLANA_ERROR__JSON_RPC__INVALID_PARAMS                                           ErrorCode = -32602
+// 	SOLANA_ERROR__JSON_RPC__METHOD_NOT_FOUND                                         ErrorCode = -32601
+// 	SOLANA_ERROR__JSON_RPC__INVALID_REQUEST                                          ErrorCode = -32600
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_MIN_CONTEXT_SLOT_NOT_REACHED                ErrorCode = -32016
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION             ErrorCode = -32015
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_BLOCK_STATUS_NOT_AVAILABLE_YET              ErrorCode = -32014
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_TRANSACTION_SIGNATURE_LEN_MISMATCH          ErrorCode = -32013
+// 	SOLANA_ERROR__JSON_RPC__SCAN_ERROR                                               ErrorCode = -32012
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_TRANSACTION_HISTORY_NOT_AVAILABLE           ErrorCode = -32011
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_KEY_EXCLUDED_FROM_SECONDARY_INDEX           ErrorCode = -32010
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_LONG_TERM_STORAGE_SLOT_SKIPPED              ErrorCode = -32009
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NO_SNAPSHOT                                 ErrorCode = -32008
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SLOT_SKIPPED                                ErrorCode = -32007
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_TRANSACTION_PRECOMPILE_VERIFICATION_FAILURE ErrorCode = -32006
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_NODE_UNHEALTHY                              ErrorCode = -32005
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_BLOCK_NOT_AVAILABLE                         ErrorCode = -32004
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_TRANSACTION_SIGNATURE_VERIFICATION_FAILURE  ErrorCode = -32003
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_SEND_TRANSACTION_PREFLIGHT_FAILURE          ErrorCode = -32002
+// 	SOLANA_ERROR__JSON_RPC__SERVER_ERROR_BLOCK_CLEANED_UP                            ErrorCode = -32001
+// )
+
+// // Addresses-related errors.
+// // Reserve error codes in the range [2800000-2800999].
+// const (
+// 	SOLANA_ERROR__ADDRESSES__INVALID_BYTE_LENGTH                 ErrorCode = 2800000
+// 	SOLANA_ERROR__ADDRESSES__STRING_LENGTH_OUT_OF_RANGE          ErrorCode = 2800001
+// 	SOLANA_ERROR__ADDRESSES__INVALID_BASE58_ENCODED_ADDRESS      ErrorCode = 2800002
+// 	SOLANA_ERROR__ADDRESSES__INVALID_ED25519_PUBLIC_KEY          ErrorCode = 2800003
+// 	SOLANA_ERROR__ADDRESSES__MALFORMED_PDA                       ErrorCode = 2800004
+// 	SOLANA_ERROR__ADDRESSES__PDA_BUMP_SEED_OUT_OF_RANGE          ErrorCode = 2800005
+// 	SOLANA_ERROR__ADDRESSES__MAX_NUMBER_OF_PDA_SEEDS_EXCEEDED    ErrorCode = 2800006
+// 	SOLANA_ERROR__ADDRESSES__MAX_PDA_SEED_LENGTH_EXCEEDED        ErrorCode = 2800007
+// 	SOLANA_ERROR__ADDRESSES__INVALID_SEEDS_POINT_ON_CURVE        ErrorCode = 2800008
+// 	SOLANA_ERROR__ADDRESSES__FAILED_TO_FIND_VIABLE_PDA_BUMP_SEED ErrorCode = 2800009
+// 	SOLANA_ERROR__ADDRESSES__PDA_ENDS_WITH_PDA_MARKER            ErrorCode = 2800010
+// )
+
+// // Account-related errors.
+// // Reserve error codes in the range [3230000-3230999].
+// const (
+// 	SOLANA_ERROR__ACCOUNTS__ACCOUNT_NOT_FOUND                   ErrorCode = 3230000
+// 	SOLANA_ERROR__ACCOUNTS__ONE_OR_MORE_ACCOUNTS_NOT_FOUND      ErrorCode = 32300001
+// 	SOLANA_ERROR__ACCOUNTS__FAILED_TO_DECODE_ACCOUNT            ErrorCode = 3230002
+// 	SOLANA_ERROR__ACCOUNTS__EXPECTED_DECODED_ACCOUNT            ErrorCode = 3230003
+// 	SOLANA_ERROR__ACCOUNTS__EXPECTED_ALL_ACCOUNTS_TO_BE_DECODED ErrorCode = 3230004
+// )
+
+// // Subtle-Crypto-related errors.
+// // Reserve error codes in the range [3610000-3610999].
+// const (
+// 	SOLANA_ERROR__SUBTLE_CRYPTO__DISALLOWED_IN_INSECURE_CONTEXT    ErrorCode = 3610000
+// 	SOLANA_ERROR__SUBTLE_CRYPTO__DIGEST_UNIMPLEMENTED              ErrorCode = 3610001
+// 	SOLANA_ERROR__SUBTLE_CRYPTO__ED25519_ALGORITHM_UNIMPLEMENTED   ErrorCode = 3610002
+// 	SOLANA_ERROR__SUBTLE_CRYPTO__EXPORT_FUNCTION_UNIMPLEMENTED     ErrorCode = 3610003
+// 	SOLANA_ERROR__SUBTLE_CRYPTO__GENERATE_FUNCTION_UNIMPLEMENTED   ErrorCode = 3610004
+// 	SOLANA_ERROR__SUBTLE_CRYPTO__SIGN_FUNCTION_UNIMPLEMENTED       ErrorCode = 3610005
+// 	SOLANA_ERROR__SUBTLE_CRYPTO__VERIFY_FUNCTION_UNIMPLEMENTED     ErrorCode = 3610006
+// 	SOLANA_ERROR__SUBTLE_CRYPTO__CANNOT_EXPORT_NON_EXTRACTABLE_KEY ErrorCode = 3610007
+// )
+
+// // Crypto-related errors.
+// // Reserve error codes in the range [3611000-3611050].
+// const (
+// 	SOLANA_ERROR__CRYPTO__RANDOM_VALUES_FUNCTION_UNIMPLEMENTED ErrorCode = 3611000
+// )
+
+// // Key-related errors.
+// // Reserve error codes in the range [3704000-3704999].
+// const (
+// 	SOLANA_ERROR__KEYS__INVALID_KEY_PAIR_BYTE_LENGTH         ErrorCode = 3704000
+// 	SOLANA_ERROR__KEYS__INVALID_PRIVATE_KEY_BYTE_LENGTH      ErrorCode = 3704001
+// 	SOLANA_ERROR__KEYS__INVALID_SIGNATURE_BYTE_LENGTH        ErrorCode = 3704002
+// 	SOLANA_ERROR__KEYS__SIGNATURE_STRING_LENGTH_OUT_OF_RANGE ErrorCode = 3704003
+// 	SOLANA_ERROR__KEYS__PUBLIC_KEY_MUST_MATCH_PRIVATE_KEY    ErrorCode = 3704004
+// )
+
+// // Instruction-related errors.
+// // Reserve error codes in the range [4128000-4128999].
+// const (
+// 	SOLANA_ERROR__INSTRUCTION__EXPECTED_TO_HAVE_ACCOUNTS ErrorCode = 4128000
+// 	SOLANA_ERROR__INSTRUCTION__EXPECTED_TO_HAVE_DATA     ErrorCode = 4128001
+// 	SOLANA_ERROR__INSTRUCTION__PROGRAM_ID_MISMATCH       ErrorCode = 4128002
+// )
+
+// // Instruction errors.
+// // Reserve error codes starting with [4615000-4615999] for the Rust enum `InstructionError`.
+// // Error names here are dictated by the RPC (see ./instruction-error.ts).
+// const (
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__UNKNOWN                                     ErrorCode = 4615000
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__GENERIC_ERROR                               ErrorCode = 4615001
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__INVALID_ARGUMENT                            ErrorCode = 4615002
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__INVALID_INSTRUCTION_DATA                    ErrorCode = 4615003
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__INVALID_ACCOUNT_DATA                        ErrorCode = 4615004
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__ACCOUNT_DATA_TOO_SMALL                      ErrorCode = 4615005
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__INSUFFICIENT_FUNDS                          ErrorCode = 4615006
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__INCORRECT_PROGRAM_ID                        ErrorCode = 4615007
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__MISSING_REQUIRED_SIGNATURE                  ErrorCode = 4615008
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__ACCOUNT_ALREADY_INITIALIZED                 ErrorCode = 4615009
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__UNINITIALIZED_ACCOUNT                       ErrorCode = 4615010
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__UNBALANCED_INSTRUCTION                      ErrorCode = 4615011
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__MODIFIED_PROGRAM_ID                         ErrorCode = 4615012
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__EXTERNAL_ACCOUNT_LAMPORT_SPEND              ErrorCode = 4615013
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__EXTERNAL_ACCOUNT_DATA_MODIFIED              ErrorCode = 4615014
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__READONLY_LAMPORT_CHANGE                     ErrorCode = 4615015
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__READONLY_DATA_MODIFIED                      ErrorCode = 4615016
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__DUPLICATE_ACCOUNT_INDEX                     ErrorCode = 4615017
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__EXECUTABLE_MODIFIED                         ErrorCode = 4615018
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__RENT_EPOCH_MODIFIED                         ErrorCode = 4615019
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__NOT_ENOUGH_ACCOUNT_KEYS                     ErrorCode = 4615020
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__ACCOUNT_DATA_SIZE_CHANGED                   ErrorCode = 4615021
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__ACCOUNT_NOT_EXECUTABLE                      ErrorCode = 4615022
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__ACCOUNT_BORROW_FAILED                       ErrorCode = 4615023
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__ACCOUNT_BORROW_OUTSTANDING                  ErrorCode = 4615024
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__DUPLICATE_ACCOUNT_OUT_OF_SYNC               ErrorCode = 4615025
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__CUSTOM                                      ErrorCode = 4615026
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__INVALID_ERROR                               ErrorCode = 4615027
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__EXECUTABLE_DATA_MODIFIED                    ErrorCode = 4615028
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__EXECUTABLE_LAMPORT_CHANGE                   ErrorCode = 4615029
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__EXECUTABLE_ACCOUNT_NOT_RENT_EXEMPT          ErrorCode = 4615030
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__UNSUPPORTED_PROGRAM_ID                      ErrorCode = 4615031
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__CALL_DEPTH                                  ErrorCode = 4615032
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__MISSING_ACCOUNT                             ErrorCode = 4615033
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__REENTRANCY_NOT_ALLOWED                      ErrorCode = 4615034
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__MAX_SEED_LENGTH_EXCEEDED                    ErrorCode = 4615035
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__INVALID_SEEDS                               ErrorCode = 4615036
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__INVALID_REALLOC                             ErrorCode = 4615037
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__COMPUTATIONAL_BUDGET_EXCEEDED               ErrorCode = 4615038
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__PRIVILEGE_ESCALATION                        ErrorCode = 4615039
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__PROGRAM_ENVIRONMENT_SETUP_FAILURE           ErrorCode = 4615040
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__PROGRAM_FAILED_TO_COMPLETE                  ErrorCode = 4615041
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__PROGRAM_FAILED_TO_COMPILE                   ErrorCode = 4615042
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__IMMUTABLE                                   ErrorCode = 4615043
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__INCORRECT_AUTHORITY                         ErrorCode = 4615044
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__BORSH_IO_ERROR                              ErrorCode = 4615045
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__ACCOUNT_NOT_RENT_EXEMPT                     ErrorCode = 4615046
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__INVALID_ACCOUNT_OWNER                       ErrorCode = 4615047
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__ARITHMETIC_OVERFLOW                         ErrorCode = 4615048
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__UNSUPPORTED_SYSVAR                          ErrorCode = 4615049
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__ILLEGAL_OWNER                               ErrorCode = 4615050
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__MAX_ACCOUNTS_DATA_ALLOCATIONS_EXCEEDED      ErrorCode = 4615051
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__MAX_ACCOUNTS_EXCEEDED                       ErrorCode = 4615052
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__MAX_INSTRUCTION_TRACE_LENGTH_EXCEEDED       ErrorCode = 4615053
+// 	SOLANA_ERROR__INSTRUCTION_ERROR__BUILTIN_PROGRAMS_MUST_CONSUME_COMPUTE_UNITS ErrorCode = 4615054
+// )
+
+// // Signer-related errors.
+// // Reserve error codes in the range [5508000-5508999].
+// const (
+// 	SOLANA_ERROR__SIGNER__ADDRESS_CANNOT_HAVE_MULTIPLE_SIGNERS             ErrorCode = 5508000
+// 	SOLANA_ERROR__SIGNER__EXPECTED_KEY_PAIR_SIGNER                         ErrorCode = 5508001
+// 	SOLANA_ERROR__SIGNER__EXPECTED_MESSAGE_SIGNER                          ErrorCode = 5508002
+// 	SOLANA_ERROR__SIGNER__EXPECTED_MESSAGE_MODIFYING_SIGNER                ErrorCode = 5508003
+// 	SOLANA_ERROR__SIGNER__EXPECTED_MESSAGE_PARTIAL_SIGNER                  ErrorCode = 5508004
+// 	SOLANA_ERROR__SIGNER__EXPECTED_TRANSACTION_SIGNER                      ErrorCode = 5508005
+// 	SOLANA_ERROR__SIGNER__EXPECTED_TRANSACTION_MODIFYING_SIGNER            ErrorCode = 5508006
+// 	SOLANA_ERROR__SIGNER__EXPECTED_TRANSACTION_PARTIAL_SIGNER              ErrorCode = 5508007
+// 	SOLANA_ERROR__SIGNER__EXPECTED_TRANSACTION_SENDING_SIGNER              ErrorCode = 5508008
+// 	SOLANA_ERROR__SIGNER__TRANSACTION_CANNOT_HAVE_MULTIPLE_SENDING_SIGNERS ErrorCode = 5508009
+// 	SOLANA_ERROR__SIGNER__TRANSACTION_SENDING_SIGNER_MISSING               ErrorCode = 5508010
+// 	SOLANA_ERROR__SIGNER__WALLET_MULTISIGN_UNIMPLEMENTED                   ErrorCode = 5508011
+// )
+
+// // Transaction-related errors.
+// // Reserve error codes in the range [5663000-5663999].
+// const (
+// 	SOLANA_ERROR__TRANSACTION__INVOKED_PROGRAMS_CANNOT_PAY_FEES                                  ErrorCode = 5663000
+// 	SOLANA_ERROR__TRANSACTION__INVOKED_PROGRAMS_MUST_NOT_BE_WRITABLE                             ErrorCode = 5663001
+// 	SOLANA_ERROR__TRANSACTION__EXPECTED_BLOCKHASH_LIFETIME                                       ErrorCode = 5663002
+// 	SOLANA_ERROR__TRANSACTION__EXPECTED_NONCE_LIFETIME                                           ErrorCode = 5663003
+// 	SOLANA_ERROR__TRANSACTION__VERSION_NUMBER_OUT_OF_RANGE                                       ErrorCode = 5663004
+// 	SOLANA_ERROR__TRANSACTION__FAILED_TO_DECOMPILE_ADDRESS_LOOKUP_TABLE_CONTENTS_MISSING         ErrorCode = 5663005
+// 	SOLANA_ERROR__TRANSACTION__FAILED_TO_DECOMPILE_ADDRESS_LOOKUP_TABLE_INDEX_OUT_OF_RANGE       ErrorCode = 5663006
+// 	SOLANA_ERROR__TRANSACTION__FAILED_TO_DECOMPILE_INSTRUCTION_PROGRAM_ADDRESS_NOT_FOUND         ErrorCode = 5663007
+// 	SOLANA_ERROR__TRANSACTION__FAILED_TO_DECOMPILE_FEE_PAYER_MISSING                             ErrorCode = 5663008
+// 	SOLANA_ERROR__TRANSACTION__SIGNATURES_MISSING                                                ErrorCode = 5663009
+// 	SOLANA_ERROR__TRANSACTION__ADDRESS_MISSING                                                   ErrorCode = 5663010
+// 	SOLANA_ERROR__TRANSACTION__FEE_PAYER_MISSING                                                 ErrorCode = 5663011
+// 	SOLANA_ERROR__TRANSACTION__FEE_PAYER_SIGNATURE_MISSING                                       ErrorCode = 5663012
+// 	SOLANA_ERROR__TRANSACTION__INVALID_NONCE_TRANSACTION_INSTRUCTIONS_MISSING                    ErrorCode = 5663013
+// 	SOLANA_ERROR__TRANSACTION__INVALID_NONCE_TRANSACTION_FIRST_INSTRUCTION_MUST_BE_ADVANCE_NONCE ErrorCode = 5663014
+// 	SOLANA_ERROR__TRANSACTION__ADDRESSES_CANNOT_SIGN_TRANSACTION                                 ErrorCode = 5663015
+// 	SOLANA_ERROR__TRANSACTION__CANNOT_ENCODE_WITH_EMPTY_SIGNATURES                               ErrorCode = 5663016
+// 	SOLANA_ERROR__TRANSACTION__MESSAGE_SIGNATURES_MISMATCH                                       ErrorCode = 5663017
+// 	SOLANA_ERROR__TRANSACTION__FAILED_TO_ESTIMATE_COMPUTE_LIMIT                                  ErrorCode = 5663018
+// 	SOLANA_ERROR__TRANSACTION__FAILED_WHEN_SIMULATING_TO_ESTIMATE_COMPUTE_LIMIT                  ErrorCode = 5663019
+// )
+
+// // Transaction errors.
+// // Reserve error codes starting with [7050000-7050999] for the Rust enum `TransactionError`.
+// // Error names here are dictated by the RPC (see ./transaction-error.ts).
+// const (
+// 	SOLANA_ERROR__TRANSACTION_ERROR__UNKNOWN                    ErrorCode = 7050000
+// 	SOLANA_ERROR__TRANSACTION_ERROR__ACCOUNT_IN_USE             ErrorCode = 7050001
+// 	SOLANA_ERROR__TRANSACTION_ERROR__ACCOUNT_LOADED_TWICE       ErrorCode = 7050002
+// 	SOLANA_ERROR__TRANSACTION_ERROR__ACCOUNT_NOT_FOUND          ErrorCode = 7050003
+// 	SOLANA_ERROR__TRANSACTION_ERROR__PROGRAM_ACCOUNT_NOT_FOUND  ErrorCode = 7050004
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_FEE ErrorCode = 7050005
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INVALID_ACCOUNT_FOR_FEE    ErrorCode = 7050006
+// 	SOLANA_ERROR__TRANSACTION_ERROR__ALREADY_PROCESSED          ErrorCode = 7050007
+// 	SOLANA_ERROR__TRANSACTION_ERROR__BLOCKHASH_NOT_FOUND        ErrorCode = 7050008
+// )
+
+// // `InstructionError` intentionally omitted.
+// const (
+// 	SOLANA_ERROR__TRANSACTION_ERROR__CALL_CHAIN_TOO_DEEP                      ErrorCode = 7050009
+// 	SOLANA_ERROR__TRANSACTION_ERROR__MISSING_SIGNATURE_FOR_FEE                ErrorCode = 7050010
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INVALID_ACCOUNT_INDEX                    ErrorCode = 7050011
+// 	SOLANA_ERROR__TRANSACTION_ERROR__SIGNATURE_FAILURE                        ErrorCode = 7050012
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INVALID_PROGRAM_FOR_EXECUTION            ErrorCode = 7050013
+// 	SOLANA_ERROR__TRANSACTION_ERROR__SANITIZE_FAILURE                         ErrorCode = 7050014
+// 	SOLANA_ERROR__TRANSACTION_ERROR__CLUSTER_MAINTENANCE                      ErrorCode = 7050015
+// 	SOLANA_ERROR__TRANSACTION_ERROR__ACCOUNT_BORROW_OUTSTANDING               ErrorCode = 7050016
+// 	SOLANA_ERROR__TRANSACTION_ERROR__WOULD_EXCEED_MAX_BLOCK_COST_LIMIT        ErrorCode = 7050017
+// 	SOLANA_ERROR__TRANSACTION_ERROR__UNSUPPORTED_VERSION                      ErrorCode = 7050018
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INVALID_WRITABLE_ACCOUNT                 ErrorCode = 7050019
+// 	SOLANA_ERROR__TRANSACTION_ERROR__WOULD_EXCEED_MAX_ACCOUNT_COST_LIMIT      ErrorCode = 7050020
+// 	SOLANA_ERROR__TRANSACTION_ERROR__WOULD_EXCEED_ACCOUNT_DATA_BLOCK_LIMIT    ErrorCode = 7050021
+// 	SOLANA_ERROR__TRANSACTION_ERROR__TOO_MANY_ACCOUNT_LOCKS                   ErrorCode = 7050022
+// 	SOLANA_ERROR__TRANSACTION_ERROR__ADDRESS_LOOKUP_TABLE_NOT_FOUND           ErrorCode = 7050023
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INVALID_ADDRESS_LOOKUP_TABLE_OWNER       ErrorCode = 7050024
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INVALID_ADDRESS_LOOKUP_TABLE_DATA        ErrorCode = 7050025
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INVALID_ADDRESS_LOOKUP_TABLE_INDEX       ErrorCode = 7050026
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INVALID_RENT_PAYING_ACCOUNT              ErrorCode = 7050027
+// 	SOLANA_ERROR__TRANSACTION_ERROR__WOULD_EXCEED_MAX_VOTE_COST_LIMIT         ErrorCode = 7050028
+// 	SOLANA_ERROR__TRANSACTION_ERROR__WOULD_EXCEED_ACCOUNT_DATA_TOTAL_LIMIT    ErrorCode = 7050029
+// 	SOLANA_ERROR__TRANSACTION_ERROR__DUPLICATE_INSTRUCTION                    ErrorCode = 7050030
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INSUFFICIENT_FUNDS_FOR_RENT              ErrorCode = 7050031
+// 	SOLANA_ERROR__TRANSACTION_ERROR__MAX_LOADED_ACCOUNTS_DATA_SIZE_EXCEEDED   ErrorCode = 7050032
+// 	SOLANA_ERROR__TRANSACTION_ERROR__INVALID_LOADED_ACCOUNTS_DATA_SIZE_LIMIT  ErrorCode = 7050033
+// 	SOLANA_ERROR__TRANSACTION_ERROR__RESANITIZATION_NEEDED                    ErrorCode = 7050034
+// 	SOLANA_ERROR__TRANSACTION_ERROR__PROGRAM_EXECUTION_TEMPORARILY_RESTRICTED ErrorCode = 7050035
+// 	SOLANA_ERROR__TRANSACTION_ERROR__UNBALANCED_TRANSACTION                   ErrorCode = 7050036
+// )
+
+// // Codec-related errors.
+// // Reserve error codes in the range [8078000-8078999].
+// const (
+// 	SOLANA_ERROR__CODECS__CANNOT_DECODE_EMPTY_BYTE_ARRAY                   ErrorCode = 8078000
+// 	SOLANA_ERROR__CODECS__INVALID_BYTE_LENGTH                              ErrorCode = 8078001
+// 	SOLANA_ERROR__CODECS__EXPECTED_FIXED_LENGTH                            ErrorCode = 8078002
+// 	SOLANA_ERROR__CODECS__EXPECTED_VARIABLE_LENGTH                         ErrorCode = 8078003
+// 	SOLANA_ERROR__CODECS__ENCODER_DECODER_SIZE_COMPATIBILITY_MISMATCH      ErrorCode = 8078004
+// 	SOLANA_ERROR__CODECS__ENCODER_DECODER_FIXED_SIZE_MISMATCH              ErrorCode = 8078005
+// 	SOLANA_ERROR__CODECS__ENCODER_DECODER_MAX_SIZE_MISMATCH                ErrorCode = 8078006
+// 	SOLANA_ERROR__CODECS__INVALID_NUMBER_OF_ITEMS                          ErrorCode = 8078007
+// 	SOLANA_ERROR__CODECS__ENUM_DISCRIMINATOR_OUT_OF_RANGE                  ErrorCode = 8078008
+// 	SOLANA_ERROR__CODECS__INVALID_DISCRIMINATED_UNION_VARIANT              ErrorCode = 8078009
+// 	SOLANA_ERROR__CODECS__INVALID_ENUM_VARIANT                             ErrorCode = 8078010
+// 	SOLANA_ERROR__CODECS__NUMBER_OUT_OF_RANGE                              ErrorCode = 8078011
+// 	SOLANA_ERROR__CODECS__INVALID_STRING_FOR_BASE                          ErrorCode = 8078012
+// 	SOLANA_ERROR__CODECS__EXPECTED_POSITIVE_BYTE_LENGTH                    ErrorCode = 8078013
+// 	SOLANA_ERROR__CODECS__OFFSET_OUT_OF_RANGE                              ErrorCode = 8078014
+// 	SOLANA_ERROR__CODECS__INVALID_LITERAL_UNION_VARIANT                    ErrorCode = 8078015
+// 	SOLANA_ERROR__CODECS__LITERAL_UNION_DISCRIMINATOR_OUT_OF_RANGE         ErrorCode = 8078016
+// 	SOLANA_ERROR__CODECS__UNION_VARIANT_OUT_OF_RANGE                       ErrorCode = 8078017
+// 	SOLANA_ERROR__CODECS__INVALID_CONSTANT                                 ErrorCode = 8078018
+// 	SOLANA_ERROR__CODECS__EXPECTED_ZERO_VALUE_TO_MATCH_ITEM_FIXED_SIZE     ErrorCode = 8078019
+// 	SOLANA_ERROR__CODECS__ENCODED_BYTES_MUST_NOT_INCLUDE_SENTINEL          ErrorCode = 8078020
+// 	SOLANA_ERROR__CODECS__SENTINEL_MISSING_IN_DECODED_BYTES                ErrorCode = 8078021
+// 	SOLANA_ERROR__CODECS__CANNOT_USE_LEXICAL_VALUES_AS_ENUM_DISCRIMINATORS ErrorCode = 8078022
+// )
+
+// // RPC-related errors.
+// // Reserve error codes in the range [8100000-8100999].
+// const (
+// 	SOLANA_ERROR__RPC__INTEGER_OVERFLOW                ErrorCode = 8100000
+// 	SOLANA_ERROR__RPC__TRANSPORT_HTTP_HEADER_FORBIDDEN ErrorCode = 8100001
+// 	SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR            ErrorCode = 8100002
+// 	SOLANA_ERROR__RPC__API_PLAN_MISSING_FOR_RPC_METHOD ErrorCode = 8100003
+// )
+
+// // RPC-Subscriptions-related errors.
+// // Reserve error codes in the range [8190000-8190999].
+// const (
+// 	SOLANA_ERROR__RPC_SUBSCRIPTIONS__CANNOT_CREATE_SUBSCRIPTION_PLAN        ErrorCode = 8190000
+// 	SOLANA_ERROR__RPC_SUBSCRIPTIONS__EXPECTED_SERVER_SUBSCRIPTION_ID        ErrorCode = 8190001
+// 	SOLANA_ERROR__RPC_SUBSCRIPTIONS__CHANNEL_CLOSED_BEFORE_MESSAGE_BUFFERED ErrorCode = 8190002
+// 	SOLANA_ERROR__RPC_SUBSCRIPTIONS__CHANNEL_CONNECTION_CLOSED              ErrorCode = 8190003
+// 	SOLANA_ERROR__RPC_SUBSCRIPTIONS__CHANNEL_FAILED_TO_CONNECT              ErrorCode = 8190004
+// )
+
+// // Invariant violation errors.
+// // Reserve error codes in the range [9900000-9900999].
+// // These errors should only be thrown when there is a bug with the
+// // library itself and should, in theory, never reach the end user.
+// const (
+// 	SOLANA_ERROR__INVARIANT_VIOLATION__SUBSCRIPTION_ITERATOR_STATE_MISSING                                           ErrorCode = 9900000
+// 	SOLANA_ERROR__INVARIANT_VIOLATION__SUBSCRIPTION_ITERATOR_MUST_NOT_POLL_BEFORE_RESOLVING_EXISTING_MESSAGE_PROMISE ErrorCode = 9900001
+// 	SOLANA_ERROR__INVARIANT_VIOLATION__CACHED_ABORTABLE_ITERABLE_CACHE_ENTRY_MISSING                                 ErrorCode = 9900002
+// 	SOLANA_ERROR__INVARIANT_VIOLATION__SWITCH_MUST_BE_EXHAUSTIVE                                                     ErrorCode = 9900003
+// 	SOLANA_ERROR__INVARIANT_VIOLATION__DATA_PUBLISHER_CHANNEL_UNIMPLEMENTED                                          ErrorCode = 9900004
+// )
+
+// //TODO: Implement the Format method
+// // func (e ErrorCode) Format(f fmt.State, c rune) {
+// // 	constants := struct {
+// // 		SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED                ErrorCode
+// // 		SOLANA_ERROR__INVALID_NONCE                        ErrorCode
+// // 		SOLANA_ERROR__NONCE_ACCOUNT_NOT_FOUND              ErrorCode
+// // 		SOLANA_ERROR__BLOCKHASH_STRING_LENGTH_OUT_OF_RANGE ErrorCode
+// // 		SOLANA_ERROR__INVALID_BLOCKHASH_BYTE_LENGTH        ErrorCode
+// // 		SOLANA_ERROR__LAMPORTS_OUT_OF_RANGE                ErrorCode
+// // 		SOLANA_ERROR__MALFORMED_BIGINT_STRING              ErrorCode
+// // 		SOLANA_ERROR__MALFORMED_NUMBER_STRING              ErrorCode
+// // 		SOLANA_ERROR__TIMESTAMP_OUT_OF_RANGE               ErrorCode
+// // 	}{
+// // 		SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED,
+// // 		SOLANA_ERROR__INVALID_NONCE,
+// // 		SOLANA_ERROR__NONCE_ACCOUNT_NOT_FOUND,
+// // 		SOLANA_ERROR__BLOCKHASH_STRING_LENGTH_OUT_OF_RANGE,
+// // 		SOLANA_ERROR__INVALID_BLOCKHASH_BYTE_LENGTH,
+// // 		SOLANA_ERROR__LAMPORTS_OUT_OF_RANGE,
+// // 		SOLANA_ERROR__MALFORMED_BIGINT_STRING,
+// // 		SOLANA_ERROR__MALFORMED_NUMBER_STRING,
+// // 		SOLANA_ERROR__TIMESTAMP_OUT_OF_RANGE,
+// // 	}
+
+// // 	val := reflect.ValueOf(constants)
+// // 	typ := reflect.TypeOf(constants)
+
+// // 	for i := 0; i < val.NumField(); i++ {
+// // 		if val.Field(i).Interface() == e {
+// // 			fmt.Fprintf(f, "%s", typ.Field(i).Name)
+// // 			return
+// // 		}
+// // 	}
+// // 	fmt.Fprintf(f, "Unknown error code")
+// // }
