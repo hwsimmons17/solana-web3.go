@@ -1,4 +1,22 @@
-package base58
+/*
+Keypair is a package for creating and managing Solana keypairs.
+
+This package has a dependency on the `base58` package, and on ed25519 from the standard library.
+
+Example:
+
+	privateKey := os.GetEnv("PRIVATE_KEY")
+	keypair, err := keypair.NewKeypairFromBase58(privateKey)
+	if err != nil {
+		panic(err)
+	}
+	signature, err := keypair.Signer.Sign([]byte("hello world"))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(signature)
+*/
+package keypair
 
 import (
 	"crypto/ed25519"

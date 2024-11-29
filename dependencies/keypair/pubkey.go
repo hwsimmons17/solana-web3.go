@@ -1,4 +1,4 @@
-package base58
+package keypair
 
 import (
 	"errors"
