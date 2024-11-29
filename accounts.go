@@ -2,6 +2,11 @@ package solana
 
 import "errors"
 
+type AccountWithBalance struct {
+	Address  string `json:"address"` //Base-58 encoded address of the account
+	Lamports uint   `json:"balance"` //Number of lamports in the account, as a u64
+}
+
 // The amount of bytes required to store the base account information without its data.
 const BASE_ACCOUNT_SIZE = 128
 

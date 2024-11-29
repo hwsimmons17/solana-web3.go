@@ -52,3 +52,41 @@ type EpochSchedule struct {
 	FirstNormalEpoch         uint `json:"firstNormalEpoch"`         //First normal-length epoch, log2(slotsPerEpoch) - log2(MINIMUM_SLOTS_PER_EPOCH)
 	FirstNormalSlot          uint `json:"firstNormalSlot"`          //MINIMUM_SLOTS_PER_EPOCH * (2.pow(firstNormalEpoch) - 1)
 }
+
+type HighestSnapshotSlot struct {
+	Full        uint  `json:"full"`        //Highest full snapshot slot
+	Incremental *uint `json:"incremental"` //Highest incremental snapshot slot based on full
+}
+
+type InflationGovernor struct {
+	Initial        float64 `json:"initial"`        //The initial inflation percentage from time 0
+	Terminal       float64 `json:"terminal"`       //The terminal inflation percentage
+	Taper          float64 `json:"taper"`          //Rate per year at which inflation is lowered. (Rate reduction is derived using the target slot time in genesis config)
+	Foundation     float64 `json:"foundation"`     //Percentage of total inflation allocated to the foundation
+	FoundationTerm float64 `json:"foundationTerm"` //Duration of foundation pool inflation in years
+}
+
+type InflationRate struct {
+	Total      float64 `json:"total"`      //Total inflation
+	Validator  float64 `json:"validator"`  //Inflation awarded to validators
+	Foundation float64 `json:"foundation"` //Inflation awarded to the foundation
+	Epoch      uint    `json:"epoch"`      //Epoch for which these values are valid
+}
+
+type InflationReward struct {
+	Epoch         uint `json:"epoch"`         //The epoch for which rewards are calculated
+	EffectiveSlot uint `json:"effectiveSlot"` //The slot in which the rewards are effective
+	Amount        uint `json:"amount"`        //Reward amount in lamports
+	PostBalance   uint `json:"postBalance"`   //Post balance of the account in lamports
+	Comission     uint `json:"comission"`     //Vote account commission when the reward was credited
+}
+
+type LeaderSchedule map[string][]uint //A dictionary of validator identities, as base-58 encoded strings, and their corresponding leader slot indices as values (indices are relative to the first slot in the requested epoch)
+
+type PerformanceSample struct {
+	Slot                   uint `json:"slot"`                   //Slot in which sample was taken at
+	NumTransactions        uint `json:"numTransactions"`        //Number of transactions processed during the sample period
+	NumSlots               uint `json:"numSlots"`               //Number of slots completed during the sample period
+	SamplePeriodSecs       uint `json:"samplePeriodSecs"`       //Number of seconds in a sample window
+	NumNonVoteTransactions uint `json:"numNonVoteTransactions"` //Number of non-vote transactions processed during the sample period
+}
