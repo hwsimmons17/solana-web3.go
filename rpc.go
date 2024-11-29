@@ -3,9 +3,22 @@ package solana
 import "fmt"
 
 type Rpc interface {
-	GetAccountInfo(address Address, config ...GetAccountInfoConfig) (EncodedAccount, error) //Returns all information associated with the account of provided Pubkey
-	GetBalance(address Address, config ...GetBalanceConfig) (uint, error)                   //Returns the lamport balance of the account of provided Pubkey
-	GetBlock(slotNumber uint, config ...GetBlockConfig) (*Block, error)                     //Returns identity and transaction information about a confirmed block in the ledger
+	GetAccountInfo(address Address, config ...GetAccountInfoConfig) (EncodedAccount, error)  //Returns all information associated with the account of provided Pubkey
+	GetBalance(address Address, config ...StandardRpcConfig) (uint, error)                   //Returns the lamport balance of the account of provided Pubkey
+	GetBlock(slotNumber uint, config ...GetBlockConfig) (*Block, error)                      //Returns identity and transaction information about a confirmed block in the ledger
+	GetBlockCommitment(slotNumber uint) (BlockCommitment, error)                             //Returns the current block height and the estimated production time of a block
+	GetBlockHeight(config ...StandardRpcConfig) (uint, error)                                //Returns the current block height of the node
+	GetBlockProduction(config ...GetBlockProductionConfig) (BlockProduction, error)          //Returns recent block production information from the current or previous epoch.
+	GetBlockTime(slotNumber uint) (int, error)                                               //Returns the estimated production time of a block as a unix timestamp.
+	GetBlocks(startSlot uint, endSlot *uint, config ...GetBlockConfig) ([]uint, error)       //Returns a list of confirmed blocks between two slots
+	GetBlocksWithLimit(startSlot uint, limit uint, config ...GetBlockConfig) ([]uint, error) //Returns a list of confirmed blocks starting at the given slot
+	GetClusterNodes() ([]ClusterNode, error)                                                 //Returns information about all the nodes participating in the cluster
+	GetEpochInfo(...StandardRpcConfig) (EpochInfo, error)                                    //Returns information about the current epoch
+	GetEpochSchedule() (EpochSchedule, error)                                                //Returns the epoch schedule information from this cluster's genesis config
+	GetFeeForMessage(msg string, config ...StandardRpcConfig) (*uint, error)                 //Get the fee the network will charge for a particular Message. NOTE: This method is only available in solana-core v1.9 or newer. Please use getFees for solana-core v1.8 and below.
+	GetFirstAvailableBlock() (uint, error)                                                   //Returns the slot of the lowest confirmed block that has not been purged from the ledger
+	GetGenesisHash() (string, error)                                                         //Returns the genesis hash
+	GetHealth() error                                                                        //Returns the current health of the node. A healthy node is one that is within HEALTH_CHECK_SLOT_DISTANCE slots of the latest cluster confirmed slot.
 
 }
 
@@ -16,7 +29,7 @@ type GetAccountInfoConfig struct {
 	MinContextSlot *int        `json:"minContextSlot"` //The minimum slot that the request can be evaluated at
 }
 
-type GetBalanceConfig struct {
+type StandardRpcConfig struct {
 	Commitment     *Commitment `json:"commitment"`     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
 	MinContextSlot *int        `json:"minContextSlot"` //The minimum slot that the request can be evaluated at
 }
@@ -27,6 +40,16 @@ type GetBlockConfig struct {
 	TransactionDetails             *TransactionDetails `json:"transactionDetails"`             //Level of transaction detail to return -- default is "full"
 	MaxSupportedTransactionVersion int                 `json:"maxSupportedTransactionVersion"` //If this parameter is omitted, only legacy transactions will be returned, and a block containing any versioned transaction will prompt the error.
 	Rewards                        bool                `json:"rewards"`                        //Whether to populate the rewards array. If parameter not provided, the default includes rewards.
+}
+
+type GetBlockProductionConfig struct {
+	Commitment *Commitment `json:"commitment"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	Identity   *string     `json:"identity"`   //Only return results for this validator identity (base-58 encoded)
+	Range      *BlockRange `json:"range"`      //Slot range to return block production for. If parameter not provided, defaults to current epoch.
+}
+
+type GetBlocksConfig struct {
+	Commitment *Commitment `json:"commitment"` //"processed" is not supported
 }
 
 // For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
