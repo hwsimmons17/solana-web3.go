@@ -5,6 +5,8 @@ import (
 	"log"
 	"solana"
 	"testing"
+
+	"github.com/mr-tron/base58"
 )
 
 func TestParsePubkey(t *testing.T) {
@@ -24,6 +26,14 @@ func TestParsePubkey(t *testing.T) {
 	}
 }
 
+func TestParsePubkeyBytes(t *testing.T) {
+	bytes, _ := base58.Decode("5oNDL3swdJJF1g9DzJiZ4ynHXgszjAEpUkxVYejchzrY")
+	key, _ := ParsePubkeyBytes(bytes)
+	if key.String() != "5oNDL3swdJJF1g9DzJiZ4ynHXgszjAEpUkxVYejchzrY" {
+		log.Fatal("Expected pubkey to match")
+	}
+}
+
 func TestPubkeyString(t *testing.T) {
 	expected := "5oNDL3swdJJF1g9DzJiZ4ynHXgszjAEpUkxVYejchzrY"
 	key, _ := ParsePubkey(expected)
@@ -38,6 +48,20 @@ func TestPubkeyBytes(t *testing.T) {
 	bytes := key.Bytes()
 	if len(bytes) != 32 {
 		log.Fatal("Expected pubkey bytes to be 32 bytes")
+	}
+}
+
+func TestIsOnCurve(t *testing.T) {
+	strOnCurve := "5oNDL3swdJJF1g9DzJiZ4ynHXgszjAEpUkxVYejchzrY"
+	keyOnCurve, _ := ParsePubkey(strOnCurve)
+	if !keyOnCurve.IsOnCurve() {
+		log.Fatal("Expected pubkey to be on curve")
+	}
+
+	strNotOnCurve := "5oNDL3swdJJF1g9DzJiZ4ynHXgszjAEpUkxVYejchzrQ"
+	keyNotOnCurve, _ := ParsePubkey(strNotOnCurve)
+	if keyNotOnCurve.IsOnCurve() {
+		log.Fatal("Expected pubkey to not be on curve")
 	}
 }
 

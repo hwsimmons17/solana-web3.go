@@ -6,6 +6,7 @@ type Pubkey interface {
 	Bytes() []byte
 	MarshalJSON() ([]byte, error)
 	UnmarshalJSON(data []byte) error
+	IsOnCurve() bool
 }
 
 // Represents a keypair in the Solana blockchain.

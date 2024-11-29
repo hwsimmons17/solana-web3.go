@@ -22,6 +22,11 @@ func ParsePubkey(str string) (solana.Pubkey, error) {
 	return &key, nil
 }
 
+func ParsePubkeyBytes(bytes []byte) (solana.Pubkey, error) {
+	str := base58.Encode(bytes)
+	return ParsePubkey(str)
+}
+
 func (p *Pubkey) String() string {
 	return string(*p)
 }
@@ -29,6 +34,10 @@ func (p *Pubkey) String() string {
 func (p *Pubkey) Bytes() []byte {
 	bytes, _ := base58.Decode(p.String())
 	return bytes
+}
+
+func (p *Pubkey) IsOnCurve() bool {
+	return IsOnCurve(p.Bytes())
 }
 
 func (p *Pubkey) MarshalJSON() ([]byte, error) {
