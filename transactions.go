@@ -50,21 +50,6 @@ type InnerInstructions struct {
 	Instructions []TransactionInstruction `json:"instructions"` //Ordered list of inner program instructions that were invoked during a single transaction instruction.
 }
 
-type TokenBalance struct {
-	AccountIndex  int           `json:"accountIndex"` //Index of the account in which the token balance is provided for.
-	Mint          string        `json:"mint"`         //Pubkey of the token's mint.
-	Owner         *string       `json:"owner"`        //Pubkey of token balance's owner.
-	ProgramID     *string       `json:"programId"`    //Pubkey of the Token program that owns the account.
-	UiTokenAmount UiTokenAmount `json:"uiTokenAmount"`
-}
-
-type UiTokenAmount struct {
-	Amount         string `json:"amount"`         //Raw amount of tokens as a string, ignoring decimals.
-	Decimals       int    `json:"decimals"`       //Number of decimals configured for token's mint.
-	UiAmountString string `json:"uiAmountString"` //Token amount as a string, accounting for decimals.
-	UiAmount       string `json:"uiAmount"`       //Deprecated: Token amount as a float, accounting for decimals.
-}
-
 type TransactionReward struct {
 	Pubkey      string      `json:"pubkey"`      //The public key, as base-58 encoded string, of the account that received the reward
 	Lamports    int         `json:"lamports"`    //number of reward lamports credited or debited by the account, as a i64

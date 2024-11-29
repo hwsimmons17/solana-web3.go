@@ -90,3 +90,46 @@ type PerformanceSample struct {
 	SamplePeriodSecs       uint `json:"samplePeriodSecs"`       //Number of seconds in a sample window
 	NumNonVoteTransactions uint `json:"numNonVoteTransactions"` //Number of non-vote transactions processed during the sample period
 }
+
+type PrioritizationFee struct {
+	Slot              uint `json:"slot"`              //The slot for which the fee applies
+	PrioritizationFee uint `json:"prioritizationFee"` //The per-compute-unit fee paid by at least one successfully landed transaction, specified in increments of micro-lamports (0.000001 lamports)
+}
+
+type SignatureStatus struct {
+	Slot               uint              `json:"slot"`               //The slot in which the transaction was processed
+	Confirmations      *uint             `json:"confirmations"`      //Number of blocks since signature confirmation, null if rooted, as well as finalized by a supermajority of the cluster
+	Err                any               `json:"err"`                //Error if transaction failed
+	ConfirmationStatus *Commitment       `json:"confirmationStatus"` //The transaction's cluster confirmation status
+	Status             TransactionStatus `json:"status"`             //Deprecated: Transaction status
+}
+
+type TransactionSignature struct {
+	Signature          string      `json:"signature"`          //The transaction signature, as base-58 encoded string
+	Slot               uint        `json:"slot"`               //The slot that contains the block with the transaction
+	Err                any         `json:"err"`                //Error if transaction failed
+	Memo               *string     `json:"memo"`               //Memo associated with the transaction, null if no memo is present
+	BlockTime          *int        `json:"blockTime"`          //Estimated production time, as Unix timestamp (seconds since the Unix epoch) of when transaction was processed. null if not available.
+	ConfirmationStatus *Commitment `json:"confirmationStatus"` //The transaction's cluster confirmation status
+}
+
+type Version struct {
+	SolanaCore string `json:"solana-core"` //software version of solana-core as a string
+	FeatureSet uint   `json:"feature-set"` //unique identifier of the feature set
+}
+
+type VoteAccounts struct {
+	Current    []VoteAccount `json:"current"`    //The current vote accounts
+	Delinquent []VoteAccount `json:"delinquent"` //The delinquent vote accounts
+}
+
+type VoteAccount struct {
+	VotePubkey       string   `json:"votePubkey"`       //Vote account public key, as base-58 encoded string
+	NodePubkey       string   `json:"nodePubkey"`       //Validator identity, as base-58 encoded string
+	ActivatedStake   uint     `json:"activatedStake"`   //The stake, in lamports, delegated to this vote account and activated
+	EpochVoteAccount bool     `json:"epochVoteAccount"` //Whether the vote account is staked for this epoch
+	Comission        uint     `json:"comission"`        //Percentage (0-100) of rewards payout owed to the vote account
+	LastVote         uint     `json:"lastVote"`         //Most recent slot voted on by this vote account
+	EpochCredits     [][]uint `json:"epochCredits"`     //Latest history of earned credits for up to five epochs, as an array of arrays containing: [epoch, credits, previousCredits].
+	RootSlot         uint     `json:"rootSlot"`         //Current root slot for this vote account
+}

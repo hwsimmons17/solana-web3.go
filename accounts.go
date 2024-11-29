@@ -7,6 +7,13 @@ type AccountWithBalance struct {
 	Lamports uint   `json:"balance"` //Number of lamports in the account, as a u64
 }
 
+type Supply struct {
+	Total                  uint     `json:"total"`                  //Total supply in lamports
+	Circulating            uint     `json:"circulating"`            //Circulating supply in lamports
+	NonCirculating         uint     `json:"nonCirculating"`         //Non-circulating supply in lamports
+	NonCirculatingAccounts []string `json:"nonCirculatingAccounts"` //An array of account addresses of non-circulating accounts, as strings. If excludeNonCirculatingAccountsList is enabled, the returned array will be empty.
+}
+
 // The amount of bytes required to store the base account information without its data.
 const BASE_ACCOUNT_SIZE = 128
 
@@ -24,14 +31,22 @@ type Account[T any] struct {
 	Address    Address `json:"address"`
 	Data       []byte  `json:"data"`
 	ParsedData T       `json:"parsedData"`
-	BaseAccount
+	Executable bool    `json:"executable"`
+	Lamports   uint    `json:"lamports"`
+	Owner      Address `json:"owner"`
+	RentEpoch  uint64  `json:"rentEpoch"`
+	Space      int     `json:"space"`
 }
 
 // Defines a Solana account with its generic details and encoded data.
 type EncodedAccount struct {
-	Address Address `json:"address"`
-	Data    []byte  `json:"data"`
-	BaseAccount
+	Address    Address `json:"address"`
+	Data       []byte  `json:"data"`
+	Executable bool    `json:"executable"`
+	Lamports   uint    `json:"lamports"`
+	Owner      Address `json:"owner"`
+	RentEpoch  uint64  `json:"rentEpoch"`
+	Space      int     `json:"space"`
 }
 
 func DecodeAccount[T any](
@@ -50,9 +65,13 @@ func DecodeAccount[T any](
 	}
 
 	return Account[T]{
-		Address:     encodedAccount.Address,
-		Data:        encodedAccount.Data,
-		ParsedData:  data,
-		BaseAccount: encodedAccount.BaseAccount,
+		Address:    encodedAccount.Address,
+		Data:       encodedAccount.Data,
+		ParsedData: data,
+		Executable: encodedAccount.Executable,
+		Lamports:   encodedAccount.Lamports,
+		Owner:      encodedAccount.Owner,
+		RentEpoch:  encodedAccount.RentEpoch,
+		Space:      encodedAccount.Space,
 	}, nil
 }
