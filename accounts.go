@@ -19,34 +19,34 @@ const BASE_ACCOUNT_SIZE = 128
 
 // Describe the generic account details applicable to every account.
 type BaseAccount struct {
-	Executable bool    `json:"executable"`
-	Lamports   uint    `json:"lamports"`
-	Owner      Address `json:"owner"`
-	RentEpoch  uint64  `json:"rentEpoch"`
-	Space      int     `json:"space"`
+	Executable bool   `json:"executable"`
+	Lamports   uint   `json:"lamports"`
+	Owner      Pubkey `json:"owner"`
+	RentEpoch  uint64 `json:"rentEpoch"`
+	Space      int    `json:"space"`
 }
 
 // Defines a Solana account with its generic details or encoded data.
 type Account[T any] struct {
-	Address    Address `json:"address"`
-	Data       []byte  `json:"data"`
-	ParsedData T       `json:"parsedData"`
-	Executable bool    `json:"executable"`
-	Lamports   uint    `json:"lamports"`
-	Owner      Address `json:"owner"`
-	RentEpoch  uint64  `json:"rentEpoch"`
-	Space      int     `json:"space"`
+	Address    Pubkey `json:"address"`
+	Data       []byte `json:"data"`
+	ParsedData T      `json:"parsedData"`
+	Executable bool   `json:"executable"`
+	Lamports   uint   `json:"lamports"`
+	Owner      Pubkey `json:"owner"`
+	RentEpoch  uint64 `json:"rentEpoch"`
+	Space      int    `json:"space"`
 }
 
 // Defines a Solana account with its generic details and encoded data.
 type EncodedAccount struct {
-	Address    Address `json:"address"`
-	Data       []byte  `json:"data"`
-	Executable bool    `json:"executable"`
-	Lamports   uint    `json:"lamports"`
-	Owner      Address `json:"owner"`
-	RentEpoch  uint64  `json:"rentEpoch"`
-	Space      int     `json:"space"`
+	Address    Pubkey `json:"address"`
+	Data       []byte `json:"data"`
+	Executable bool   `json:"executable"`
+	Lamports   uint   `json:"lamports"`
+	Owner      Pubkey `json:"owner"`
+	RentEpoch  uint64 `json:"rentEpoch"`
+	Space      int    `json:"space"`
 }
 
 func DecodeAccount[T any](

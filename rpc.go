@@ -1,8 +1,8 @@
 package solana
 
 type Rpc interface {
-	GetAccountInfo(address Address, config ...GetAccountInfoConfig) (EncodedAccount, error)                                                              //Returns all information associated with the account of provided Pubkey
-	GetBalance(address Address, config ...StandardRpcConfig) (uint, error)                                                                               //Returns the lamport balance of the account of provided Pubkey
+	GetAccountInfo(address Pubkey, config ...GetAccountInfoConfig) (EncodedAccount, error)                                                               //Returns all information associated with the account of provided Pubkey
+	GetBalance(address Pubkey, config ...StandardRpcConfig) (uint, error)                                                                                //Returns the lamport balance of the account of provided Pubkey
 	GetBlock(slotNumber uint, config ...GetBlockConfig) (*Block, error)                                                                                  //Returns identity and transaction information about a confirmed block in the ledger
 	GetBlockCommitment(slotNumber uint) (BlockCommitment, error)                                                                                         //Returns the current block height and the estimated production time of a block
 	GetBlockHeight(config ...StandardRpcConfig) (uint, error)                                                                                            //Returns the current block height of the node
@@ -33,17 +33,17 @@ type Rpc interface {
 	GetRecentPerformanceSamples(limit uint) ([]PerformanceSample, error)                                                                                 //Returns a list of recent performance samples, in reverse slot order. Performance samples are taken every 60 seconds and include the number of transactions and slots that occur in a given time window. -- NOTE max limit is 720
 	GetRecentPrioritizationFees(addresses []string) (PrioritizationFee, error)                                                                           //Returns a list of prioritization fees from recent blocks.
 	GetSignatureStatuses(signatures []string, config ...GetSignatureStatusesConfig) ([]*SignatureStatus, error)                                          //Returns the statuses of a list of signatures. Each signature must be a txid, the first signature of a transaction. Unless the searchTransactionHistory configuration parameter is included, this method only searches the recent status cache of signatures, which retains statuses for all active slots plus MAX_RECENT_BLOCKHASHES rooted slots.
-	GetSignaturesForAddress(account string, config ...GetSignaturesForAddressConfig) ([]TransactionSignature, error)                                     //Returns signatures for confirmed transactions that include the given address in their accountKeys list. Returns signatures backwards in time from the provided signature or most recent confirmed block
+	GetSignaturesForAddress(address Pubkey, config ...GetSignaturesForAddressConfig) ([]TransactionSignature, error)                                     //Returns signatures for confirmed transactions that include the given address in their accountKeys list. Returns signatures backwards in time from the provided signature or most recent confirmed block
 	GetSlot(config ...StandardRpcConfig) (uint, error)                                                                                                   //Returns the slot that has reached the given or default commitment level
 	GetSlotLeader(config ...StandardRpcConfig) (string, error)                                                                                           //Returns the current slot leader
 	GetSlotLeaders(start, end uint) ([]string, error)                                                                                                    //Returns the slot leaders for a given slot range
 	GetStakeMinimumDelegation(config ...StandardCommitmentConfig) (uint, error)                                                                          //Returns the stake minimum delegation, in lamports.
 	GetSupply(config ...GetSupplyConfig) (Supply, error)                                                                                                 //Returns information about the current supply.
-	GetTokenAccountBalance(account string, config ...StandardCommitmentConfig) (UiTokenAmount, error)                                                    //Returns the token balance of an SPL Token account.
-	GetTokenAccountsByDelegate(delegateAccount string, opts *GetTokenAccountsByDelegateConfig, config ...GetAccountInfoConfig) ([]EncodedAccount, error) //Returns all SPL Token accounts by approved Delegate.
-	GetTokenAccountsByOwner(ownerAccount string, opts *GetTokenAccountsByDelegateConfig, config ...GetAccountInfoConfig) ([]EncodedAccount, error)       //Returns all SPL Token accounts by token owner.
-	GetTokenLargestAccounts(mintAccount string, config ...StandardCommitmentConfig) ([]UiTokenAmount, error)                                             //Returns the 20 largest accounts of a particular SPL Token type.
-	GetTokenSupply(mintAccount string, config ...StandardCommitmentConfig) (UiTokenAmount, error)                                                        //Returns the total supply of an SPL Token type.
+	GetTokenAccountBalance(address Pubkey, config ...StandardCommitmentConfig) (UiTokenAmount, error)                                                    //Returns the token balance of an SPL Token account.
+	GetTokenAccountsByDelegate(delegateAddress Pubkey, opts *GetTokenAccountsByDelegateConfig, config ...GetAccountInfoConfig) ([]EncodedAccount, error) //Returns all SPL Token accounts by approved Delegate.
+	GetTokenAccountsByOwner(ownerAddress Pubkey, opts *GetTokenAccountsByDelegateConfig, config ...GetAccountInfoConfig) ([]EncodedAccount, error)       //Returns all SPL Token accounts by token owner.
+	GetTokenLargestAccounts(mintAddress Pubkey, config ...StandardCommitmentConfig) ([]UiTokenAmount, error)                                             //Returns the 20 largest accounts of a particular SPL Token type.
+	GetTokenSupply(mintAddress Pubkey, config ...StandardCommitmentConfig) (UiTokenAmount, error)                                                        //Returns the total supply of an SPL Token type.
 	GetTransaction(transactionSignature string, config ...GetTransactionSignatureConfig) (*Transaction, error)                                           //Returns transaction details for a confirmed transaction
 	GetTransactionCount(config ...StandardRpcConfig) (uint, error)                                                                                       //Returns the current transaction count from the ledger
 	GetVersion() (Version, error)                                                                                                                        //Returns the current Solana version running on the node
@@ -71,6 +71,43 @@ type Rpc interface {
 	SendTransaction(fullySignedTransaction string, config ...SendTransactionConfig) (string, error)
 	SimulateTransaction(transaction string, config ...SimulateTransactionConfig) (SimulateTransactionResult, error) //Simulate sending a transaction. NOTE: Transaction needs a valid recent blockhash, but does not need to be signed
 }
+
+// For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+type Commitment string
+
+const (
+	CommitmentFinalized Commitment = "finalized" // (Most finalized) The node will query the most recent block confirmed by supermajority of the cluster as having reached maximum lockout, meaning the cluster has recognized this block as finalized
+	CommitmentConfirmed Commitment = "confirmed" // (Middle finalized) The node will query the most recent block that has been voted on by supermajority of the cluster.
+	CommitmentProcessed Commitment = "processed" // (Least finalized) The node will query its most recent block. Note that the block may still be skipped by the cluster.
+)
+
+// Encoding format for Account data
+type Encoding string
+
+const (
+	EncodingBase58     Encoding = "base58"      // Is slow and limited to less than 129 bytes of Account data.
+	EncodingBase64     Encoding = "base64"      // Will return base64 encoded data for Account data of any size.
+	EncodingBase64Zstd Encoding = "base64+zstd" // Compresses the Account data using Zstandard and base64-encodes the result.
+	EncodingJson       Encoding = "json"        // Encoding attempts to use program-specific state parsers to return more human-readable and explicit account state data.
+	EncodingJsonParsed Encoding = "jsonParsed"  // Encoding attempts to use program-specific state parsers to return more human-readable and explicit account state data.
+)
+
+// Level of transaction detail to return -- default is "full"
+type TransactionDetails string
+
+const (
+	TransactionDetailsFull       TransactionDetails = "full"       // Return all transaction fields
+	TransactionDetailsAccounts   TransactionDetails = "accounts"   // If accounts are requested, transaction details only include signatures and an annotated list of accounts in each transaction.
+	TransactionDetailsSignatures TransactionDetails = "signatures" // If signatures are requested, transaction details only include signatures.
+	TransactionDetailsNone       TransactionDetails = "none"
+)
+
+type Filter string
+
+const (
+	FilterCirculating    Filter = "circulating"
+	FilterNonCirculating Filter = "nonCirculating"
+)
 
 type StandardRpcConfig struct {
 	Commitment     *Commitment `json:"commitment"`     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
@@ -189,86 +226,142 @@ type SimulateTransactionResult struct {
 	InnerInstructions []InnerInstructions `json:"innerInstructions"` //Defined only if innerInstructions was set to true. The value is a list of inner instructions.
 }
 
-// For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-type Commitment string
-
-const (
-	CommitmentFinalized Commitment = "finalized" // (Most finalized) The node will query the most recent block confirmed by supermajority of the cluster as having reached maximum lockout, meaning the cluster has recognized this block as finalized
-	CommitmentConfirmed Commitment = "confirmed" // (Middle finalized) The node will query the most recent block that has been voted on by supermajority of the cluster.
-	CommitmentProcessed Commitment = "processed" // (Least finalized) The node will query its most recent block. Note that the block may still be skipped by the cluster.
-)
-
-// Encoding format for Account data
-type Encoding string
-
-const (
-	EncodingBase58     Encoding = "base58"      // Is slow and limited to less than 129 bytes of Account data.
-	EncodingBase64     Encoding = "base64"      // Will return base64 encoded data for Account data of any size.
-	EncodingBase64Zstd Encoding = "base64+zstd" // Compresses the Account data using Zstandard and base64-encodes the result.
-	EncodingJson       Encoding = "json"        // Encoding attempts to use program-specific state parsers to return more human-readable and explicit account state data.
-	EncodingJsonParsed Encoding = "jsonParsed"  // Encoding attempts to use program-specific state parsers to return more human-readable and explicit account state data.
-)
-
-// Level of transaction detail to return -- default is "full"
-type TransactionDetails string
-
-const (
-	TransactionDetailsFull       TransactionDetails = "full"       // Return all transaction fields
-	TransactionDetailsAccounts   TransactionDetails = "accounts"   // If accounts are requested, transaction details only include signatures and an annotated list of accounts in each transaction.
-	TransactionDetailsSignatures TransactionDetails = "signatures" // If signatures are requested, transaction details only include signatures.
-	TransactionDetailsNone       TransactionDetails = "none"
-)
-
 // Request a slice of the account's data.
 type DataSlice struct {
 	Offset int `json:"offset"`
 	Length int `json:"length"`
 }
 
-type Filter string
+type Block struct {
+	BlockHeight       *int                `json:"blockHeight"`       //The number of blocks beneath this block
+	BlockTime         *int                `json:"blockTime"`         //Estimated production time, as Unix timestamp (seconds since the Unix epoch). null if not available
+	Blockhash         string              `json:"blockhash"`         //The blockhash of this block, as base-58 encoded string
+	ParentSlot        uint                `json:"parentSlot"`        //The slot index of this block's parent
+	PreviousBlockhash string              `json:"previousBlockhash"` //The blockhash of this block's parent, as base-58 encoded string; if the parent block is not available due to ledger cleanup, this field will return "11111111111111111111111111111111"
+	Transactions      []Transaction       `json:"transactions"`      //The list of transactions included in this block
+	Signatures        []string            `json:"signatures"`        //Present if "signatures" are requested for transaction details; an array of signatures strings, corresponding to the transaction order in the block
+	Rewards           []TransactionReward `json:"rewards"`           //Block-level rewards, present if rewards are requested; an array of JSON objects containing:
+}
 
-const (
-	FilterCirculating    Filter = "circulating"
-	FilterNonCirculating Filter = "nonCirculating"
-)
+type BlockCommitment struct {
+	Commitment []uint //Commitment, array of u64 integers logging the amount of cluster stake in lamports that has voted on the block at each depth from 0 to MAX_LOCKOUT_HISTORY + 1
+	TotalStake uint   //Total active stake, in lamports, of the current epoch
+}
 
-// const LocalRpcUrl = "http://localhost:8899"
-// const DevnetRpcUrl = "https://api.devnet.solana.com"
-// const TestnetRpcUrl = "https://api.testnet.solana.com"
-// const MainnetRpcUrl = "https://api.mainnet-beta.solana.com"
+type BlockRange struct {
+	FirstSlot uint  `json:"firstSlot"` //first slot to return block production information for (inclusive)
+	LastSlot  *uint `json:"lastSlot"`  //Last slot to return block production information for (inclusive). If parameter not provided, defaults to the highest slot
+}
 
-// type RpcRequest[T any] struct {
-// 	MethodName string `json:"methodName"`
-// 	Params     T      `json:"params"`
-// }
+type BlockProduction struct {
+	ByIdentity map[string][]uint `json:"byIdentity"` //A dictionary of validator identities, as base-58 encoded strings. Value is a two element array containing the number of leader slots and the number of blocks produced.
+	Range      BlockRange        `json:"range"`      //Block production slot range
+}
 
-// type RpcMessage[T any] struct {
-// 	ID      string `json:"id"`
-// 	Jsonrpc string `json:"jsonrpc"`
-// 	Method  string `json:"method"`
-// 	Params  T      `json:"params"`
-// }
+type ClusterNode struct {
+	Pubkey       string  `json:"pubkey"`       //Node public key, as base-58 encoded string
+	Gossip       *string `json:"gossip"`       //Gossip network address for the node
+	Tpu          *string `json:"tpu"`          //TPU network address for the node
+	Rpc          *string `json:"rpc"`          //JSON RPC network address for the node, or null if the JSON RPC service is not enabled
+	Version      *string `json:"version"`      //The software version of the node, or null if the version information is not available
+	FeatureSet   *uint   `json:"featureSet"`   //The unique identifier of the node's feature set
+	ShredVersion *uint   `json:"shredVersion"` //The shred version the node has been configured to use
+}
 
-// // Required for the JSON-RPC request.
-// var nextMessageId = 0
+type EpochInfo struct {
+	AbsoluteSlot     uint  `json:"absoluteSlot"`     //The current slot
+	BlockHeight      uint  `json:"blockHeight"`      //The current block height
+	Epoch            uint  `json:"epoch"`            //The current epoch
+	SlotIndex        uint  `json:"slotIndex"`        //The current slot relative to the start of the current epoch
+	SlotsInEpoch     uint  `json:"slotsInEpoch"`     //The number of slots in this epoch
+	TransactionCount *uint `json:"transactionCount"` //Total number of transactions processed without error since genesis
+}
 
-// func getNextMessageId() string {
-// 	id := nextMessageId
-// 	nextMessageId++
-// 	return fmt.Sprintf("%d", id)
-// }
+type EpochSchedule struct {
+	SlotsPerEpoch            uint `json:"slotsPerEpoch"`            //The maximum number of slots in each epoch
+	LeaderScheduleSlotOffset uint `json:"leaderScheduleSlotOffset"` //The number of slots before beginning of an epoch to calculate a leader schedule for that epoch
+	Warmup                   bool `json:"warmup"`                   //Whether epochs start short and grow
+	FirstNormalEpoch         uint `json:"firstNormalEpoch"`         //First normal-length epoch, log2(slotsPerEpoch) - log2(MINIMUM_SLOTS_PER_EPOCH)
+	FirstNormalSlot          uint `json:"firstNormalSlot"`          //MINIMUM_SLOTS_PER_EPOCH * (2.pow(firstNormalEpoch) - 1)
+}
 
-// func CreateRpcMessage(request RpcRequest[any]) RpcMessage[any] {
-// 	return RpcMessage[any]{
-// 		ID:      getNextMessageId(),
-// 		Jsonrpc: "2.0",
-// 		Method:  request.MethodName,
-// 		Params:  request.Params,
-// 	}
-// }
+type HighestSnapshotSlot struct {
+	Full        uint  `json:"full"`        //Highest full snapshot slot
+	Incremental *uint `json:"incremental"` //Highest incremental snapshot slot based on full
+}
 
-// type RpcErrorResponsePayload struct {
-// 	Code    int         `json:"code"`
-// 	Data    interface{} `json:"data"`
-// 	Message string      `json:"message"`
-// }
+type InflationGovernor struct {
+	Initial        float64 `json:"initial"`        //The initial inflation percentage from time 0
+	Terminal       float64 `json:"terminal"`       //The terminal inflation percentage
+	Taper          float64 `json:"taper"`          //Rate per year at which inflation is lowered. (Rate reduction is derived using the target slot time in genesis config)
+	Foundation     float64 `json:"foundation"`     //Percentage of total inflation allocated to the foundation
+	FoundationTerm float64 `json:"foundationTerm"` //Duration of foundation pool inflation in years
+}
+
+type InflationRate struct {
+	Total      float64 `json:"total"`      //Total inflation
+	Validator  float64 `json:"validator"`  //Inflation awarded to validators
+	Foundation float64 `json:"foundation"` //Inflation awarded to the foundation
+	Epoch      uint    `json:"epoch"`      //Epoch for which these values are valid
+}
+
+type InflationReward struct {
+	Epoch         uint `json:"epoch"`         //The epoch for which rewards are calculated
+	EffectiveSlot uint `json:"effectiveSlot"` //The slot in which the rewards are effective
+	Amount        uint `json:"amount"`        //Reward amount in lamports
+	PostBalance   uint `json:"postBalance"`   //Post balance of the account in lamports
+	Comission     uint `json:"comission"`     //Vote account commission when the reward was credited
+}
+
+type LeaderSchedule map[string][]uint //A dictionary of validator identities, as base-58 encoded strings, and their corresponding leader slot indices as values (indices are relative to the first slot in the requested epoch)
+
+type PerformanceSample struct {
+	Slot                   uint `json:"slot"`                   //Slot in which sample was taken at
+	NumTransactions        uint `json:"numTransactions"`        //Number of transactions processed during the sample period
+	NumSlots               uint `json:"numSlots"`               //Number of slots completed during the sample period
+	SamplePeriodSecs       uint `json:"samplePeriodSecs"`       //Number of seconds in a sample window
+	NumNonVoteTransactions uint `json:"numNonVoteTransactions"` //Number of non-vote transactions processed during the sample period
+}
+
+type PrioritizationFee struct {
+	Slot              uint `json:"slot"`              //The slot for which the fee applies
+	PrioritizationFee uint `json:"prioritizationFee"` //The per-compute-unit fee paid by at least one successfully landed transaction, specified in increments of micro-lamports (0.000001 lamports)
+}
+
+type SignatureStatus struct {
+	Slot               uint              `json:"slot"`               //The slot in which the transaction was processed
+	Confirmations      *uint             `json:"confirmations"`      //Number of blocks since signature confirmation, null if rooted, as well as finalized by a supermajority of the cluster
+	Err                any               `json:"err"`                //Error if transaction failed
+	ConfirmationStatus *Commitment       `json:"confirmationStatus"` //The transaction's cluster confirmation status
+	Status             TransactionStatus `json:"status"`             //Deprecated: Transaction status
+}
+
+type TransactionSignature struct {
+	Signature          string      `json:"signature"`          //The transaction signature, as base-58 encoded string
+	Slot               uint        `json:"slot"`               //The slot that contains the block with the transaction
+	Err                any         `json:"err"`                //Error if transaction failed
+	Memo               *string     `json:"memo"`               //Memo associated with the transaction, null if no memo is present
+	BlockTime          *int        `json:"blockTime"`          //Estimated production time, as Unix timestamp (seconds since the Unix epoch) of when transaction was processed. null if not available.
+	ConfirmationStatus *Commitment `json:"confirmationStatus"` //The transaction's cluster confirmation status
+}
+
+type Version struct {
+	SolanaCore string `json:"solana-core"` //software version of solana-core as a string
+	FeatureSet uint   `json:"feature-set"` //unique identifier of the feature set
+}
+
+type VoteAccounts struct {
+	Current    []VoteAccount `json:"current"`    //The current vote accounts
+	Delinquent []VoteAccount `json:"delinquent"` //The delinquent vote accounts
+}
+
+type VoteAccount struct {
+	VotePubkey       string   `json:"votePubkey"`       //Vote account public key, as base-58 encoded string
+	NodePubkey       string   `json:"nodePubkey"`       //Validator identity, as base-58 encoded string
+	ActivatedStake   uint     `json:"activatedStake"`   //The stake, in lamports, delegated to this vote account and activated
+	EpochVoteAccount bool     `json:"epochVoteAccount"` //Whether the vote account is staked for this epoch
+	Comission        uint     `json:"comission"`        //Percentage (0-100) of rewards payout owed to the vote account
+	LastVote         uint     `json:"lastVote"`         //Most recent slot voted on by this vote account
+	EpochCredits     [][]uint `json:"epochCredits"`     //Latest history of earned credits for up to five epochs, as an array of arrays containing: [epoch, credits, previousCredits].
+	RootSlot         uint     `json:"rootSlot"`         //Current root slot for this vote account
+}
