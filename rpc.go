@@ -365,3 +365,26 @@ type VoteAccount struct {
 	EpochCredits     [][]uint `json:"epochCredits"`     //Latest history of earned credits for up to five epochs, as an array of arrays containing: [epoch, credits, previousCredits].
 	RootSlot         uint     `json:"rootSlot"`         //Current root slot for this vote account
 }
+
+type AccountWithBalance struct {
+	Address  string `json:"address"` //Base-58 encoded address of the account
+	Lamports uint   `json:"balance"` //Number of lamports in the account, as a u64
+}
+
+type Supply struct {
+	Total                  uint     `json:"total"`                  //Total supply in lamports
+	Circulating            uint     `json:"circulating"`            //Circulating supply in lamports
+	NonCirculating         uint     `json:"nonCirculating"`         //Non-circulating supply in lamports
+	NonCirculatingAccounts []string `json:"nonCirculatingAccounts"` //An array of account addresses of non-circulating accounts, as strings. If excludeNonCirculatingAccountsList is enabled, the returned array will be empty.
+}
+
+// Defines a Solana account with its generic details and encoded data.
+type EncodedAccount struct {
+	Address    Pubkey `json:"address"`
+	Data       []byte `json:"data"`
+	Executable bool   `json:"executable"`
+	Lamports   uint   `json:"lamports"`
+	Owner      Pubkey `json:"owner"`
+	RentEpoch  uint64 `json:"rentEpoch"`
+	Space      int    `json:"space"`
+}
