@@ -18,7 +18,7 @@ type Rpc interface {
 	GetGenesisHash() (string, error)                                                                                                                     //Returns the genesis hash
 	GetHealth() error                                                                                                                                    //Returns the current health of the node. A healthy node is one that is within HEALTH_CHECK_SLOT_DISTANCE slots of the latest cluster confirmed slot.
 	GetHighestSnapshotSlot() (HighestSnapshotSlot, error)                                                                                                //Returns the highest slot information that the node has snapshots for. This will find the highest full snapshot slot, and the highest incremental snapshot slot based on the full snapshot slot, if there is one.
-	GetIdentity() (string, error)                                                                                                                        //Returns the identity pubkey for the current node
+	GetIdentity() (Pubkey, error)                                                                                                                        //Returns the identity pubkey for the current node
 	GetInflationGovernor(config ...StandardCommitmentConfig) (InflationGovernor, error)                                                                  //Returns the current inflation governor
 	GetInflationRate(config ...StandardCommitmentConfig) (InflationRate, error)                                                                          //Returns the specific inflation values for the current epoch
 	GetInflationReward(addresses []string, config ...GetInflationRewardConfig) (InflationReward, error)                                                  //Returns the inflation / staking reward for a list of addresses for an epoch
@@ -119,52 +119,52 @@ const (
 )
 
 type StandardRpcConfig struct {
-	Commitment     *Commitment `json:"commitment"`     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-	MinContextSlot *int        `json:"minContextSlot"` //The minimum slot that the request can be evaluated at
+	Commitment     *Commitment `json:"commitment,omitempty"`     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	MinContextSlot *int        `json:"minContextSlot,omitempty"` //The minimum slot that the request can be evaluated at
 }
 
 type StandardCommitmentConfig struct {
-	Commitment *Commitment `json:"commitment"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	Commitment *Commitment `json:"commitment,omitempty"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
 }
 
 type GetAccountInfoConfig struct {
-	Commitment     *Commitment `json:"commitment"`     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-	Encoding       *Encoding   `json:"encoding"`       //Encoding format for Account data
-	DataSlice      *DataSlice  `json:"dataSlice"`      //Request a slice of the account's data.
-	MinContextSlot *int        `json:"minContextSlot"` //The minimum slot that the request can be evaluated at
+	Commitment     *Commitment `json:"commitment,omitempty"`     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	Encoding       *Encoding   `json:"encoding,omitempty"`       //Encoding format for Account data
+	DataSlice      *DataSlice  `json:"dataSlice,omitempty"`      //Request a slice of the account's data.
+	MinContextSlot *int        `json:"minContextSlot,omitempty"` //The minimum slot that the request can be evaluated at
 }
 
 type GetBlockConfig struct {
-	Commitment                     *Commitment         `json:"commitment"`                     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-	Encoding                       *Encoding           `json:"encoding"`                       //Encoding format for each returned Transaction
-	TransactionDetails             *TransactionDetails `json:"transactionDetails"`             //Level of transaction detail to return -- default is "full"
-	MaxSupportedTransactionVersion int                 `json:"maxSupportedTransactionVersion"` //If this parameter is omitted, only legacy transactions will be returned, and a block containing any versioned transaction will prompt the error.
-	Rewards                        bool                `json:"rewards"`                        //Whether to populate the rewards array. If parameter not provided, the default includes rewards.
+	Commitment                     *Commitment         `json:"commitment,omitempty"`                     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	Encoding                       *Encoding           `json:"encoding,omitempty"`                       //Encoding format for each returned Transaction
+	TransactionDetails             *TransactionDetails `json:"transactionDetails,omitempty"`             //Level of transaction detail to return -- default is "full"
+	MaxSupportedTransactionVersion int                 `json:"maxSupportedTransactionVersion,omitempty"` //If this parameter is omitted, only legacy transactions will be returned, and a block containing any versioned transaction will prompt the error.
+	Rewards                        bool                `json:"rewards,omitempty"`                        //Whether to populate the rewards array. If parameter not provided, the default includes rewards.
 }
 
 type GetBlockProductionConfig struct {
-	Commitment *Commitment `json:"commitment"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-	Identity   *string     `json:"identity"`   //Only return results for this validator identity (base-58 encoded)
-	Range      *BlockRange `json:"range"`      //Slot range to return block production for. If parameter not provided, defaults to current epoch.
+	Commitment *Commitment `json:"commitment,omitempty"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	Identity   *string     `json:"identity,omitempty"`   //Only return results for this validator identity (base-58 encoded)
+	Range      *BlockRange `json:"range,omitempty"`      //Slot range to return block production for. If parameter not provided, defaults to current epoch.
 }
 
 type GetBlocksConfig struct {
-	Commitment *Commitment `json:"commitment"` //"processed" is not supported
+	Commitment *Commitment `json:"commitment,omitempty"` //"processed" is not supported
 }
 
 type GetInflationRewardConfig struct {
-	MinContextSlot *int  `json:"minContextSlot"` //The minimum slot that the request can be evaluated at
-	Epoch          *uint `json:"epoch"`          //An epoch for which the reward occurs. If omitted, the previous epoch will be used
+	MinContextSlot *int  `json:"minContextSlot,omitempty"` //The minimum slot that the request can be evaluated at
+	Epoch          *uint `json:"epoch,omitempty"`          //An epoch for which the reward occurs. If omitted, the previous epoch will be used
 }
 
 type GetLargestAccountsConfig struct {
-	Commitment *Commitment `json:"commitment"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-	Filter     *string     `json:"filter"`     //Filter results by account type
+	Commitment *Commitment `json:"commitment,omitempty"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	Filter     *string     `json:"filter,omitempty"`     //Filter results by account type
 }
 
 type GetLeaderScheduleConfig struct {
-	Commitment *Commitment `json:"commitment"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-	Identity   *string     `json:"identity"`   //Only return results for this validator identity (base-58 encoded)
+	Commitment *Commitment `json:"commitment,omitempty"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	Identity   *string     `json:"identity,omitempty"`   //Only return results for this validator identity (base-58 encoded)
 }
 
 type GetSignatureStatusesConfig struct {
@@ -172,55 +172,55 @@ type GetSignatureStatusesConfig struct {
 }
 
 type GetSignaturesForAddressConfig struct {
-	Commitment     *Commitment `json:"commitment"`     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-	MinContextSlot *int        `json:"minContextSlot"` //The minimum slot that the request can be evaluated at
-	Limit          *uint       `json:"limit"`          //Maximum transaction signatures to return (between 1 and 1,000). Default is 1000.
-	Before         *string     `json:"before"`         //Start searching backwards from this transaction signature. If not provided the search starts from the top of the highest max confirmed block.
-	After          *string     `json:"after"`          //Search until this transaction signature, if found before limit reached
+	Commitment     *Commitment `json:"commitment,omitempty"`     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	MinContextSlot *int        `json:"minContextSlot,omitempty"` //The minimum slot that the request can be evaluated at
+	Limit          *uint       `json:"limit,omitempty"`          //Maximum transaction signatures to return (between 1 and 1,000). Default is 1000.
+	Before         *string     `json:"before,omitempty"`         //Start searching backwards from this transaction signature. If not provided the search starts from the top of the highest max confirmed block.
+	After          *string     `json:"after,omitempty"`          //Search until this transaction signature, if found before limit reached
 }
 
 type GetSupplyConfig struct {
-	Commitment                        *Commitment `json:"commitment"`                        //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-	ExcludeNonCirculatingAccountsList *bool       `json:"excludeNonCirculatingAccountsList"` //Exclude non circulating accounts list from response
+	Commitment                        *Commitment `json:"commitment,omitempty"`                        //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	ExcludeNonCirculatingAccountsList *bool       `json:"excludeNonCirculatingAccountsList,omitempty"` //Exclude non circulating accounts list from response
 }
 
 // Supply one of the following fields
 type GetTokenAccountsByDelegateConfig struct {
-	Mint      *string `json:"mint"`      //Pubkey of the specific token Mint to limit accounts to, as base-58 encoded string; or
-	ProgramID *string `json:"programId"` //Pubkey of the Token program that owns the accounts, as base-58 encoded string
+	Mint      *string `json:"mint,omitempty"`      //Pubkey of the specific token Mint to limit accounts to, as base-58 encoded string; or
+	ProgramID *string `json:"programId,omitempty"` //Pubkey of the Token program that owns the accounts, as base-58 encoded string
 }
 
 type GetTransactionSignatureConfig struct {
-	Commitment                     *Commitment `json:"commitment"`                     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-	Encoding                       *Encoding   `json:"encoding"`                       //Encoding format for each returned Transaction
-	MaxSupportedTransactionVersion int         `json:"maxSupportedTransactionVersion"` //Set the max transaction version to return in responses. If the requested transaction is a higher version, an error will be returned. If this parameter is omitted, only legacy transactions will be returned, and any versioned transaction will prompt the error.
+	Commitment                     *Commitment `json:"commitment,omitempty"`                     //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	Encoding                       *Encoding   `json:"encoding,omitempty"`                       //Encoding format for each returned Transaction
+	MaxSupportedTransactionVersion int         `json:"maxSupportedTransactionVersion,omitempty"` //Set the max transaction version to return in responses. If the requested transaction is a higher version, an error will be returned. If this parameter is omitted, only legacy transactions will be returned, and any versioned transaction will prompt the error.
 }
 
 type GetVoteAccountsConfig struct {
-	Commitment *Commitment `json:"commitment"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
-	VotePubkey *string     `json:"votePubkey"` //Only return results for this validator vote address (base-58 encoded)
+	Commitment *Commitment `json:"commitment,omitempty"` //For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
+	VotePubkey *string     `json:"votePubkey,omitempty"` //Only return results for this validator vote address (base-58 encoded)
 
 }
 
 type SendTransactionConfig struct {
-	Encoding            *Encoding   `json:"encoding"`            //Encoding used for the transaction data. Values: base58 (slow, DEPRECATED), or base64.
-	SkipPreflight       *bool       `json:"skipPreflight"`       //When true, skip the preflight transaction checks
-	PreflightCommitment *Commitment `json:"preflightCommitment"` //Default: finalized. Commitment level to use for preflight.
-	MaxRetries          *uint       `json:"maxRetries"`          //Maximum number of times for the RPC node to retry sending the transaction to the leader. If this parameter not provided, the RPC node will retry the transaction until it is finalized or until the blockhash expires.
-	MinContextSlot      *uint       `json:"minContextSlot"`      //The minimum slot that the request can be evaluated at
+	Encoding            *Encoding   `json:"encoding,omitempty"`            //Encoding used for the transaction data. Values: base58 (slow, DEPRECATED), or base64.
+	SkipPreflight       *bool       `json:"skipPreflight,omitempty"`       //When true, skip the preflight transaction checks
+	PreflightCommitment *Commitment `json:"preflightCommitment,omitempty"` //Default: finalized. Commitment level to use for preflight.
+	MaxRetries          *uint       `json:"maxRetries,omitempty"`          //Maximum number of times for the RPC node to retry sending the transaction to the leader. If this parameter not provided, the RPC node will retry the transaction until it is finalized or until the blockhash expires.
+	MinContextSlot      *uint       `json:"minContextSlot,omitempty"`      //The minimum slot that the request can be evaluated at
 }
 
 type SimulateTransactionConfig struct {
-	Commitment             *Commitment `json:"commitment"`             //Commitment level to simulate the transaction at
-	SigVerify              *bool       `json:"sigVerify"`              //If true the transaction signatures will be verified (conflicts with replaceRecentBlockhash)
-	ReplaceRecentBlockhash *bool       `json:"replaceRecentBlockhash"` //If true the transaction recent blockhash will be replaced with the most recent blockhash. (conflicts with sigVerify)
-	MinContextSlot         *uint       `json:"minContextSlot"`         //The minimum slot that the request can be evaluated at
-	Encoding               *Encoding   `json:"encoding"`               //Encoding used for the transaction data. Values: base58 (slow, DEPRECATED), or base64.
-	InnerInstructions      *bool       `json:"innerInstructions"`      //If true the response will include inner instructions. These inner instructions will be jsonParsed where possible, otherwise json.
+	Commitment             *Commitment `json:"commitment,omitempty"`             //Commitment level to simulate the transaction at
+	SigVerify              *bool       `json:"sigVerify,omitempty"`              //If true the transaction signatures will be verified (conflicts with replaceRecentBlockhash)
+	ReplaceRecentBlockhash *bool       `json:"replaceRecentBlockhash,omitempty"` //If true the transaction recent blockhash will be replaced with the most recent blockhash. (conflicts with sigVerify)
+	MinContextSlot         *uint       `json:"minContextSlot,omitempty"`         //The minimum slot that the request can be evaluated at
+	Encoding               *Encoding   `json:"encoding,omitempty"`               //Encoding used for the transaction data. Values: base58 (slow, DEPRECATED), or base64.
+	InnerInstructions      *bool       `json:"innerInstructions,omitempty"`      //If true the response will include inner instructions. These inner instructions will be jsonParsed where possible, otherwise json.
 	Accounts               *struct {
 		Addresses []string `json:"addresses"` //An array of accounts to return, as base-58 encoded strings
 		Encoding  Encoding `json:"encoding"`  //Encoding for returned Account data
-	} `json:"accounts"` //Accounts configuration object
+	} `json:"accounts,omitempty"` //Accounts configuration object
 }
 
 type SimulateTransactionResult struct {
