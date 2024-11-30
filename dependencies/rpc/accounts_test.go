@@ -8,6 +8,7 @@ import (
 
 func TestGetAccountInfo(t *testing.T) {
 	t.Skip("Skipping test that requires network access")
+
 	client := NewRpcClient(solana.RpcEndpointDevnet)
 	pubkey := keypair.MustParsePubkey("BLrD8HqBy4vKNvkb28Bijg4y6s8tE49jyVFbfZnmesjY")
 	account, err := client.GetAccountInfo(pubkey)
@@ -20,6 +21,7 @@ func TestGetAccountInfo(t *testing.T) {
 	if account.Space != 82 {
 		t.Fatal("Unexpected account space")
 	}
+	t.Fatal(account.RentEpoch.String())
 }
 
 func TestGetBalance(t *testing.T) {
@@ -51,7 +53,7 @@ func TestGetLargestAccounts(t *testing.T) {
 func TestGetMiminumBalanceForRentExemption(t *testing.T) {
 	t.Skip("Skipping test that requires network access")
 	client := NewRpcClient(solana.RpcEndpointDevnet)
-	minimum, err := client.GetMinimumBalanceForRentExemption(82)
+	minimum, err := client.GetMinimumBalanceForRentExemption(8200000)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +73,7 @@ func TestGetMultipleAccounts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Fatal(accounts)
+	t.Fatal(*accounts[0])
 }
 
 func TestGetProgramAccounts(t *testing.T) {

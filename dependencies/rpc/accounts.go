@@ -1,11 +1,59 @@
 package rpc
 
 import (
-	"errors"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"math/big"
 	"solana"
+	"solana/dependencies/keypair"
 )
 
+type encodedAccount struct {
+	Address    keypair.Pubkey `json:"address"`
+	Data       []byte         `json:"data"`
+	Executable bool           `json:"executable"`
+	Lamports   uint           `json:"lamports"`
+	Owner      keypair.Pubkey `json:"owner"`
+	RentEpoch  big.Int        `json:"rentEpoch"`
+	Space      int            `json:"space"`
+}
+
+func (a *encodedAccount) UnmarshalJSON(data []byte) error {
+	aux := &struct {
+		Address    string   `json:"address"`
+		Data       []string `json:"data"`
+		Executable bool     `json:"executable"`
+		Lamports   uint     `json:"lamports"`
+		Owner      string   `json:"owner"`
+		RentEpoch  big.Int  `json:"rentEpoch"`
+		Space      int      `json:"space"`
+	}{}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	a.Address = keypair.Pubkey(aux.Address)
+	a.Executable = aux.Executable
+	a.Lamports = uint(aux.Lamports)
+	a.Owner = keypair.Pubkey(aux.Owner)
+	a.RentEpoch = aux.RentEpoch
+	a.Space = aux.Space
+	if len(aux.Data) != 2 {
+		return fmt.Errorf("invalid data length, expected 2, got %d", len(aux.Data))
+	}
+	data, err := base64.StdEncoding.DecodeString(aux.Data[0])
+	if err != nil {
+		return err
+	}
+	a.Data = data
+	return nil
+}
+
 func (r *RpcClient) GetAccountInfo(address solana.Pubkey, config ...solana.GetAccountInfoConfig) (*solana.EncodedAccount, error) { //Returns all information associated with the account of provided Pubkey
+	var res struct {
+		Value *encodedAccount `json:"value"`
+	}
+
 	//Set the encoding to base64 no matter what
 	encoding := solana.EncodingBase64
 	params := []interface{}{address.String()}
@@ -15,124 +63,77 @@ func (r *RpcClient) GetAccountInfo(address solana.Pubkey, config ...solana.GetAc
 	} else {
 		params = append(params, solana.GetAccountInfoConfig{Encoding: &encoding})
 	}
-	res, err := r.send("getAccountInfo", params)
-	if err != nil {
+	if err := r.send("getAccountInfo", params, &res); err != nil {
 		return nil, err
 	}
 	//If the account does not exist, return nil
-	if res == nil {
+	if res.Value == nil {
 		return nil, nil
-	}
-	valueMap, err := getValueMap(res)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := getBytes(valueMap, "data")
-	if err != nil {
-		return nil, err
-	}
-	executable, err := getBool(valueMap, "executable")
-	if err != nil {
-		return nil, err
-	}
-	lamports, err := getUint(valueMap, "lamports")
-	if err != nil {
-		return nil, err
-	}
-	owner, err := getPubkey(valueMap, "owner")
-	if err != nil {
-		return nil, err
-	}
-	rentEpoch, err := getUint(valueMap, "rentEpoch")
-	if err != nil {
-		return nil, err
-	}
-	space, err := getInt(valueMap, "space")
-	if err != nil {
-		return nil, err
 	}
 
 	return &solana.EncodedAccount{
 		Address:    address,
-		Data:       data,
-		Executable: executable,
-		Lamports:   lamports,
-		Owner:      owner,
-		RentEpoch:  rentEpoch,
-		Space:      space,
+		Data:       res.Value.Data,
+		Executable: res.Value.Executable,
+		Lamports:   res.Value.Lamports,
+		Owner:      &res.Value.Owner,
+		RentEpoch:  res.Value.RentEpoch,
+		Space:      res.Value.Space,
 	}, nil
 }
 
 func (r *RpcClient) GetBalance(address solana.Pubkey, config ...solana.StandardRpcConfig) (uint, error) {
+	var res struct {
+		Value uint `json:"value"`
+	}
+
 	params := []interface{}{address.String()}
 	if len(config) > 0 {
 		params = append(params, config[0])
 	}
-	res, err := r.send("getBalance", params)
-	if err != nil {
+	if err := r.send("getBalance", params, &res); err != nil {
 		return 0, err
 	}
 
-	return getUint(res.(map[string]interface{}), "value")
+	return res.Value, nil
 }
 
 func (r *RpcClient) GetLargestAccounts(config ...solana.GetLargestAccountsConfig) ([]solana.AccountWithBalance, error) {
+	var res struct {
+		Value []solana.AccountWithBalance `json:"value"`
+	}
+
 	params := []interface{}{}
 	if len(config) > 0 {
 		params = append(params, config[0])
 	}
-	res, err := r.send("getLargestAccounts", params)
-	if err != nil {
+	if err := r.send("getLargestAccounts", params, &res); err != nil {
 		return nil, err
 	}
-	value, ok := res.(map[string]interface{})["value"].([]interface{})
-	if !ok {
-		return nil, errors.New("expected value to be []interface{}")
-	}
-	accounts := []solana.AccountWithBalance{}
-	for _, account := range value {
-		accountMap, ok := account.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("expected account to be map[string]interface{}")
-		}
-		address, err := getPubkey(accountMap, "address")
-		if err != nil {
-			return nil, err
-		}
-		lamports, err := getUint(accountMap, "lamports")
-		if err != nil {
-			return nil, err
-		}
-		accounts = append(accounts, solana.AccountWithBalance{
-			Address:  address,
-			Lamports: lamports,
-		})
-	}
 
-	return accounts, nil
+	return res.Value, nil
 }
 
 func (r *RpcClient) GetMinimumBalanceForRentExemption(accountDataLength uint, config ...solana.StandardCommitmentConfig) (uint, error) {
+	var res uint
 	params := []interface{}{
 		accountDataLength,
 	}
 	if len(config) > 0 {
 		params = append(params, config[0])
 	}
-	res, err := r.send("getMinimumBalanceForRentExemption", params)
-	if err != nil {
+	if err := r.send("getMinimumBalanceForRentExemption", params, &res); err != nil {
 		return 0, err
 	}
-	result, ok := res.(float64)
-	if !ok {
-		return 0, errors.New("expected float64")
-	}
 
-	return uint(result), nil
+	return res, nil
 }
 
 func (r *RpcClient) GetMultipleAccounts(pubkeys []solana.Pubkey, config ...solana.GetAccountInfoConfig) ([]*solana.EncodedAccount, error) {
+	var res struct {
+		Value []*encodedAccount `json:"value"`
+	}
+
 	//Set the encoding to base64 no matter what
 	encoding := solana.EncodingBase64
 	params := []interface{}{pubkeys}
@@ -142,59 +143,23 @@ func (r *RpcClient) GetMultipleAccounts(pubkeys []solana.Pubkey, config ...solan
 	} else {
 		params = append(params, solana.GetAccountInfoConfig{Encoding: &encoding})
 	}
-	res, err := r.send("getMultipleAccounts", params)
-	if err != nil {
+	if err := r.send("getMultipleAccounts", params, &res); err != nil {
 		return nil, err
 	}
-	values, ok := res.(map[string]interface{})["value"].([]interface{})
-	if !ok {
-		return nil, errors.New("expected value to be []interface{}")
-	}
-
 	var accounts []*solana.EncodedAccount
-	for i, value := range values {
-		account, ok := value.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("expected account to be map[string]interface{}")
-		}
-
-		if account == nil {
+	for _, value := range res.Value {
+		if value == nil {
 			accounts = append(accounts, nil)
 			continue
 		}
-
-		data, err := getBytes(account, "data")
-		if err != nil {
-			return nil, err
-		}
-		executable, err := getBool(account, "executable")
-		if err != nil {
-			return nil, err
-		}
-		lamports, err := getUint(account, "lamports")
-		if err != nil {
-			return nil, err
-		}
-		owner, err := getPubkey(account, "owner")
-		if err != nil {
-			return nil, err
-		}
-		rentEpoch, err := getUint(account, "rentEpoch")
-		if err != nil {
-			return nil, err
-		}
-		space, err := getInt(account, "space")
-		if err != nil {
-			return nil, err
-		}
 		accounts = append(accounts, &solana.EncodedAccount{
-			Address:    pubkeys[i],
-			Data:       data,
-			Executable: executable,
-			Lamports:   lamports,
-			Owner:      owner,
-			RentEpoch:  rentEpoch,
-			Space:      space,
+			Address:    &value.Address,
+			Data:       value.Data,
+			Executable: value.Executable,
+			Lamports:   value.Lamports,
+			Owner:      &value.Owner,
+			RentEpoch:  value.RentEpoch,
+			Space:      value.Space,
 		})
 	}
 
@@ -202,6 +167,8 @@ func (r *RpcClient) GetMultipleAccounts(pubkeys []solana.Pubkey, config ...solan
 }
 
 func (r *RpcClient) GetProgramAccounts(programPubkey solana.Pubkey, config ...solana.GetAccountInfoConfig) ([]solana.EncodedAccount, error) {
+	var res []encodedAccount
+
 	//Set the encoding to base64 no matter what
 	encoding := solana.EncodingBase64
 	params := []interface{}{programPubkey}
@@ -211,63 +178,20 @@ func (r *RpcClient) GetProgramAccounts(programPubkey solana.Pubkey, config ...so
 	} else {
 		params = append(params, solana.GetAccountInfoConfig{Encoding: &encoding})
 	}
-	res, err := r.send("getProgramAccounts", params)
-	if err != nil {
+	if err := r.send("getProgramAccounts", params, &res); err != nil {
 		return nil, err
 	}
 
-	values, ok := res.([]interface{})
-	if !ok {
-		return nil, errors.New("expected value to be []interface{}")
-	}
-
 	var accounts []solana.EncodedAccount
-	for _, value := range values {
-		val, ok := value.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("expected account to be map[string]interface{}")
-		}
-		account, ok := val["account"].(map[string]interface{})
-		if !ok {
-			return nil, errors.New("expected account to be map[string]interface{}")
-		}
-		pubkey, err := getPubkey(val, "pubkey")
-		if err != nil {
-			return nil, err
-		}
-
-		data, err := getBytes(account, "data")
-		if err != nil {
-			return nil, err
-		}
-		executable, err := getBool(account, "executable")
-		if err != nil {
-			return nil, err
-		}
-		lamports, err := getUint(account, "lamports")
-		if err != nil {
-			return nil, err
-		}
-		owner, err := getPubkey(account, "owner")
-		if err != nil {
-			return nil, err
-		}
-		rentEpoch, err := getUint(account, "rentEpoch")
-		if err != nil {
-			return nil, err
-		}
-		space, err := getInt(account, "space")
-		if err != nil {
-			return nil, err
-		}
+	for _, account := range res {
 		accounts = append(accounts, solana.EncodedAccount{
-			Address:    pubkey,
-			Data:       data,
-			Executable: executable,
-			Lamports:   lamports,
-			Owner:      owner,
-			RentEpoch:  rentEpoch,
-			Space:      space,
+			Address:    &account.Address,
+			Data:       account.Data,
+			Executable: account.Executable,
+			Lamports:   account.Lamports,
+			Owner:      &account.Owner,
+			RentEpoch:  account.RentEpoch,
+			Space:      account.Space,
 		})
 	}
 

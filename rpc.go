@@ -1,5 +1,7 @@
 package solana
 
+import "math/big"
+
 type Rpc interface {
 	GetAccountInfo(address Pubkey, config ...GetAccountInfoConfig) (*EncodedAccount, error)                                                              //Returns all information associated with the account of provided Pubkey
 	GetBalance(address Pubkey, config ...StandardRpcConfig) (uint, error)                                                                                //Returns the lamport balance of the account of provided Pubkey
@@ -389,11 +391,11 @@ type Supply struct {
 
 // Defines a Solana account with its generic details and encoded data.
 type EncodedAccount struct {
-	Address    Pubkey `json:"address"`
-	Data       []byte `json:"data"`
-	Executable bool   `json:"executable"`
-	Lamports   uint   `json:"lamports"`
-	Owner      Pubkey `json:"owner"`
-	RentEpoch  uint   `json:"rentEpoch"`
-	Space      int    `json:"space"`
+	Address    Pubkey  `json:"address"`
+	Data       []byte  `json:"data"`
+	Executable bool    `json:"executable"`
+	Lamports   uint    `json:"lamports"`
+	Owner      Pubkey  `json:"owner"`
+	RentEpoch  big.Int `json:"rentEpoch"`
+	Space      int     `json:"space"`
 }

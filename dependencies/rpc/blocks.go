@@ -3,6 +3,20 @@ package rpc
 import "solana"
 
 func (r *RpcClient) GetBlock(slotNumber uint, config ...solana.GetBlockConfig) (*solana.Block, error) {
+	//Set the encoding to base64 no matter what
+	// encoding := solana.EncodingBase64
+	// params := []interface{}{slotNumber}
+	// if len(config) > 0 {
+	// 	config[0].Encoding = &encoding
+	// 	params = append(params, config[0])
+	// } else {
+	// 	params = append(params, solana.GetAccountInfoConfig{Encoding: &encoding})
+	// }
+	// res, err := r.send("getBlock", params)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
 	return nil, nil
 }
 
