@@ -1,7 +1,7 @@
 package solana
 
 type Rpc interface {
-	GetAccountInfo(address Pubkey, config ...GetAccountInfoConfig) (EncodedAccount, error)                                                               //Returns all information associated with the account of provided Pubkey
+	GetAccountInfo(address Pubkey, config ...GetAccountInfoConfig) (*EncodedAccount, error)                                                              //Returns all information associated with the account of provided Pubkey
 	GetBalance(address Pubkey, config ...StandardRpcConfig) (uint, error)                                                                                //Returns the lamport balance of the account of provided Pubkey
 	GetBlock(slotNumber uint, config ...GetBlockConfig) (*Block, error)                                                                                  //Returns identity and transaction information about a confirmed block in the ledger
 	GetBlockCommitment(slotNumber uint) (BlockCommitment, error)                                                                                         //Returns the current block height and the estimated production time of a block
@@ -394,6 +394,6 @@ type EncodedAccount struct {
 	Executable bool   `json:"executable"`
 	Lamports   uint   `json:"lamports"`
 	Owner      Pubkey `json:"owner"`
-	RentEpoch  uint64 `json:"rentEpoch"`
+	RentEpoch  uint   `json:"rentEpoch"`
 	Space      int    `json:"space"`
 }

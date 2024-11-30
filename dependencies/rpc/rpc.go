@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -165,4 +166,100 @@ func (r *RpcClient) send(method string, params []interface{}) (interface{}, erro
 	}
 
 	return result.Result, nil
+}
+
+func getValueMap(res interface{}) (map[string]interface{}, error) {
+	resMap, ok := res.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected map[string]interface{}, got %T", res)
+	}
+	valueMap, ok := resMap["value"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected value to be map[string]interface{}, got %T", resMap["value"])
+	}
+
+	return valueMap, nil
+}
+
+func getBytes(resMap map[string]interface{}, key string) ([]byte, error) {
+	dataMap, ok := resMap[key]
+	if !ok {
+		return nil, fmt.Errorf("expected data to be present in account info")
+	}
+	dataArr, ok := dataMap.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected data to be array, got %T", resMap[key])
+	}
+	if len(dataArr) != 2 {
+		return nil, fmt.Errorf("expected data to be array of length 2, got %d", len(dataArr))
+	}
+	if dataArr[1] != "base64" {
+		return nil, fmt.Errorf("expected data encoding to be base64, got %s", dataArr[1])
+	}
+
+	var bytes []byte
+	if dataArr[0] != nil {
+		dataStr, ok := dataArr[0].(string)
+		if !ok {
+			return nil, fmt.Errorf("expected data to be string, got %T", dataArr[0])
+		}
+		d, err := base64.StdEncoding.DecodeString(dataStr)
+		if err != nil {
+			return nil, fmt.Errorf("error decoding data: %v", err)
+		}
+		bytes = d
+	}
+	return bytes, nil
+}
+
+func getBool(resMap map[string]interface{}, key string) (bool, error) {
+	val, ok := resMap[key]
+	if !ok {
+		return false, fmt.Errorf("expected %s to be present in account info, %v", key, resMap)
+	}
+	b, ok := val.(bool)
+	if !ok {
+		return false, fmt.Errorf("expected %s to be bool, got %T", key, val)
+	}
+	return b, nil
+}
+
+func getUint(resMap map[string]interface{}, key string) (uint, error) {
+	val, ok := resMap[key]
+	if !ok {
+		return 0, fmt.Errorf("expected %s to be present in account info", key)
+	}
+	f, ok := val.(float64)
+	if !ok {
+		return 0, fmt.Errorf("expected %s to be float64, got %T", key, val)
+	}
+	return uint(f), nil
+}
+
+func getInt(resMap map[string]interface{}, key string) (int, error) {
+	val, ok := resMap[key]
+	if !ok {
+		return 0, fmt.Errorf("expected %s to be present in account info", key)
+	}
+	f, ok := val.(float64)
+	if !ok {
+		return 0, fmt.Errorf("expected %s to be float64, got %T", key, val)
+	}
+	return int(f), nil
+}
+
+func getPubkey(resMap map[string]interface{}, key string) (solana.Pubkey, error) {
+	val, ok := resMap[key]
+	if !ok {
+		return nil, fmt.Errorf("expected %s to be present in account info", key)
+	}
+	str, ok := val.(string)
+	if !ok {
+		return nil, fmt.Errorf("expected %s to be string, got %T", key, val)
+	}
+	pubkey, err := keypair.ParsePubkey(str)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing %s pubkey: %v", key, err)
+	}
+	return pubkey, nil
 }

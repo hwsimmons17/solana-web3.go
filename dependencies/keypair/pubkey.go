@@ -22,6 +22,14 @@ func ParsePubkey(str string) (solana.Pubkey, error) {
 	return &key, nil
 }
 
+func MustParsePubkey(str string) solana.Pubkey {
+	key, err := ParsePubkey(str)
+	if err != nil {
+		panic(err)
+	}
+	return key
+}
+
 func ParsePubkeyBytes(bytes []byte) (solana.Pubkey, error) {
 	str := base58.Encode(bytes)
 	return ParsePubkey(str)
