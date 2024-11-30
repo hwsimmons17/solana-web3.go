@@ -72,6 +72,15 @@ type Rpc interface {
 	SimulateTransaction(transaction string, config ...SimulateTransactionConfig) (SimulateTransactionResult, error) //Simulate sending a transaction. NOTE: Transaction needs a valid recent blockhash, but does not need to be signed
 }
 
+type RpcEndpoint string
+
+const (
+	RpcEndpointMainnetBeta RpcEndpoint = "https://api.mainnet-beta.solana.com"
+	RpcEndpointDevnet      RpcEndpoint = "https://api.devnet.solana.com"
+	RpcEndpointTestnet     RpcEndpoint = "https://api.testnet.solana.com"
+	RpcEndpointLocalnet    RpcEndpoint = "http://locahost:8899"
+)
+
 // For preflight checks and transaction processing, Solana nodes choose which bank state to query based on a commitment requirement set by the client. The commitment describes how finalized a block is at that point in time. When querying the ledger state, it's recommended to use lower levels of commitment to report progress and higher levels to ensure the state will not be rolled back.
 type Commitment string
 
