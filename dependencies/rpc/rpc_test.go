@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"solana"
+	"solana/dependencies/keypair"
 	"testing"
 )
 
@@ -42,7 +43,8 @@ func TestRequestAirdrop(t *testing.T) {
 	t.Skip("Skipping test that requires network access")
 	client := NewRpcClient(solana.RpcEndpointDevnet)
 	comit := solana.CommitmentConfirmed
-	_, err := client.RequestAirdrop("5oNDL3swdJJF1g9DzJiZ4ynHXgszjAEpUkxVYejchzrY", 1000000000, solana.StandardCommitmentConfig{
+	pubkey := keypair.MustParsePubkey("5oNDL3swdJJF1g9DzJiZ4ynHXgszjAEpUkxVYejchzrY")
+	_, err := client.RequestAirdrop(pubkey, 1000000000, solana.StandardCommitmentConfig{
 		Commitment: &comit,
 	})
 	if err != nil {

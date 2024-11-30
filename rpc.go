@@ -28,8 +28,8 @@ type Rpc interface {
 	GetMaxRetransmitSlots() (uint, error)                                                                                                                //Get the max slot seen from retransmit stage.
 	GetMaxShredInsertSlot() (uint, error)                                                                                                                //Get the max slot seen from after shred insert.
 	GetMinimumBalanceForRentExemption(accountDataLength uint, config ...StandardCommitmentConfig) (uint, error)                                          //Returns minimum balance required to make account rent exempt.
-	GetMultipleAccounts(pubkeys []string, config ...GetAccountInfoConfig) ([]EncodedAccount, error)                                                      //Returns the account information for a list of Pubkeys.
-	GetProgramAccounts(programPubkey string, config ...GetAccountInfoConfig) ([]EncodedAccount, error)                                                   //Returns all accounts owned by the provided program Pubkey
+	GetMultipleAccounts(pubkeys []Pubkey, config ...GetAccountInfoConfig) ([]*EncodedAccount, error)                                                     //Returns the account information for a list of Pubkeys.
+	GetProgramAccounts(programPubkey Pubkey, config ...GetAccountInfoConfig) ([]EncodedAccount, error)                                                   //Returns all accounts owned by the provided program Pubkey
 	GetRecentPerformanceSamples(limit uint) ([]PerformanceSample, error)                                                                                 //Returns a list of recent performance samples, in reverse slot order. Performance samples are taken every 60 seconds and include the number of transactions and slots that occur in a given time window. -- NOTE max limit is 720
 	GetRecentPrioritizationFees(addresses []string) (PrioritizationFee, error)                                                                           //Returns a list of prioritization fees from recent blocks.
 	GetSignatureStatuses(signatures []string, config ...GetSignatureStatusesConfig) ([]*SignatureStatus, error)                                          //Returns the statuses of a list of signatures. Each signature must be a txid, the first signature of a transaction. Unless the searchTransactionHistory configuration parameter is included, this method only searches the recent status cache of signatures, which retains statuses for all active slots plus MAX_RECENT_BLOCKHASHES rooted slots.
@@ -50,7 +50,7 @@ type Rpc interface {
 	GetVoteAccounts(config ...GetVoteAccountsConfig) (VoteAccounts, error)                                                                               //Returns the account info and associated stake for all the voting accounts in the current bank.
 	IsBlockhashValid(blockhash string, config ...StandardRpcConfig) (bool, error)                                                                        //Returns whether a blockhash is valid
 	MinimumLedgerSlot() (uint, error)                                                                                                                    //Returns the lowest slot that the node has information about in its ledger.
-	RequestAirdrop(destinationAddress string, lamports uint, config ...StandardCommitmentConfig) (string, error)                                         //Requests an airdrop of lamports to a Solana account
+	RequestAirdrop(destinationAddress Pubkey, lamports uint, config ...StandardCommitmentConfig) (string, error)                                         //Requests an airdrop of lamports to a Solana account
 	/*
 		Submits a signed transaction to the cluster for processing.
 
@@ -376,7 +376,7 @@ type VoteAccount struct {
 }
 
 type AccountWithBalance struct {
-	Address  string `json:"address"` //Base-58 encoded address of the account
+	Address  Pubkey `json:"address"` //Base-58 encoded address of the account
 	Lamports uint   `json:"balance"` //Number of lamports in the account, as a u64
 }
 

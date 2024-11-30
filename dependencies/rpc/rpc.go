@@ -87,8 +87,8 @@ func (r *RpcClient) GetVersion() (solana.Version, error) {
 	}, nil
 }
 
-func (r *RpcClient) RequestAirdrop(destinationAddress string, lamports uint, config ...solana.StandardCommitmentConfig) (string, error) {
-	params := []interface{}{destinationAddress, lamports}
+func (r *RpcClient) RequestAirdrop(destinationAddress solana.Pubkey, lamports uint, config ...solana.StandardCommitmentConfig) (string, error) {
+	params := []interface{}{destinationAddress.String(), lamports}
 	if len(config) > 0 {
 		params = append(params, config[0])
 	}
@@ -152,10 +152,6 @@ func (r *RpcClient) send(method string, params []interface{}) (interface{}, erro
 	if err != nil {
 		return "", err
 	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("rpc request failed. Status code: %d", resp.StatusCode)
-	}
-
 	var result rpcResp
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return "", err
@@ -163,6 +159,10 @@ func (r *RpcClient) send(method string, params []interface{}) (interface{}, erro
 
 	if result.Error != nil {
 		return "", fmt.Errorf("rpc request failed. Code: %d, Message: %s, Data: %v", result.Error.Code, result.Error.Message, result.Error.Data)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("rpc request failed. Status code: %d", resp.StatusCode)
 	}
 
 	return result.Result, nil
