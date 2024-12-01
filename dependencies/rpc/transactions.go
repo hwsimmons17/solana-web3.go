@@ -2,6 +2,12 @@ package rpc
 
 import "solana"
 
+type encodedTransaction struct {
+	Meta        *solana.TransactionMeta `json:"meta"`
+	Version     *int                    `json:"version"` //Transaction version. Undefined if maxSupportedTransactionVersion is not set in request params. --note can also be "legacy"
+	Transaction []string                `json:"transaction"`
+}
+
 func (r *RpcClient) GetFeeForMessage(msg string, config ...solana.StandardRpcConfig) (*uint, error) {
 	return nil, nil
 }
@@ -18,7 +24,7 @@ func (r *RpcClient) GetSignaturesForAddress(address solana.Pubkey, config ...sol
 	return nil, nil
 }
 
-func (r *RpcClient) GetTransaction(transactionSignature string, config ...solana.GetTransactionSignatureConfig) (*solana.Transaction, error) {
+func (r *RpcClient) GetTransaction(transactionSignature string, config ...solana.GetTransactionSignatureConfig) (*solana.TransactionWithMeta, error) {
 	return nil, nil
 }
 
