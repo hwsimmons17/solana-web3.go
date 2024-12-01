@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"solana"
+	"solana/dependencies/keypair"
 	"solana/dependencies/transactions"
+	"time"
 )
 
 type block struct {
@@ -72,93 +74,247 @@ func (r *RpcClient) GetBlock(slotNumber uint, config ...solana.GetBlockConfig) (
 }
 
 func (r *RpcClient) GetBlockCommitment(slotNumber uint) (solana.BlockCommitment, error) {
-	return solana.BlockCommitment{}, nil
+	var res solana.BlockCommitment
+	params := []interface{}{slotNumber}
+	if err := r.send("getBlockCommitment", params, &res); err != nil {
+		return solana.BlockCommitment{}, err
+	}
+
+	return res, nil
 }
 
 func (r *RpcClient) GetBlockHeight(config ...solana.StandardRpcConfig) (uint, error) {
-	return 0, nil
+	var res uint
+	if err := r.send("getBlockHeight", nil, &res); err != nil {
+		return 0, err
+	}
+
+	return res, nil
 }
 
 func (r *RpcClient) GetBlockProduction(config ...solana.GetBlockProductionConfig) (solana.BlockProduction, error) {
-	return solana.BlockProduction{}, nil
+	var res struct {
+		Value solana.BlockProduction `json:"value"`
+	}
+	params := []interface{}{}
+	if len(config) > 0 {
+		params = append(params, config[0])
+	}
+	if err := r.send("getBlockProduction", params, &res); err != nil {
+		return solana.BlockProduction{}, err
+	}
+	return res.Value, nil
 }
 
-func (r *RpcClient) GetBlockTime(slotNumber uint) (int, error) {
-	return 0, nil
+func (r *RpcClient) GetBlockTime(slotNumber uint) (time.Time, error) {
+	var res int
+	params := []interface{}{slotNumber}
+	if err := r.send("getBlockTime", params, &res); err != nil {
+		return time.Time{}, err
+	}
+
+	return time.Unix(int64(res), 0), nil
 }
 
 func (r *RpcClient) GetBlocks(startSlot uint, endSlot *uint, config ...solana.GetBlockConfig) ([]uint, error) {
-	return nil, nil
+	var res []uint
+	params := []interface{}{startSlot, endSlot}
+	if len(config) > 0 {
+		params = append(params, config[0])
+	}
+	if err := r.send("getBlocks", params, &res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (r *RpcClient) GetBlocksWithLimit(startSlot uint, limit uint, config ...solana.GetBlockConfig) ([]uint, error) {
-	return nil, nil
+	var res []uint
+	params := []interface{}{startSlot, limit}
+	if len(config) > 0 {
+		params = append(params, config[0])
+	}
+	if err := r.send("getBlocksWithLimit", params, &res); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (r *RpcClient) GetClusterNodes() ([]solana.ClusterNode, error) {
-	return nil, nil
+	var res []solana.ClusterNode
+	if err := r.send("getClusterNodes", nil, &res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
-func (r *RpcClient) GetEpochInfo(...solana.StandardRpcConfig) (solana.EpochInfo, error) {
-	return solana.EpochInfo{}, nil
+func (r *RpcClient) GetEpochInfo(config ...solana.StandardRpcConfig) (solana.EpochInfo, error) {
+	var res solana.EpochInfo
+	params := []interface{}{}
+	if len(config) > 0 {
+		params = append(params, config[0])
+	}
+	if err := r.send("getEpochInfo", params, &res); err != nil {
+		return solana.EpochInfo{}, err
+	}
+
+	return res, nil
 }
 
 func (r *RpcClient) GetEpochSchedule() (solana.EpochSchedule, error) {
-	return solana.EpochSchedule{}, nil
+	var res solana.EpochSchedule
+	if err := r.send("getEpochSchedule", nil, &res); err != nil {
+		return solana.EpochSchedule{}, err
+	}
+
+	return res, nil
 }
 
 func (r *RpcClient) GetFirstAvailableBlock() (uint, error) {
-	return 0, nil
+	var res uint
+	if err := r.send("getFirstAvailableBlock", nil, &res); err != nil {
+		return 0, err
+	}
+	return res, nil
 }
 
 func (r *RpcClient) GetGenesisHash() (string, error) {
-	return "", nil
+	var res string
+	if err := r.send("getGenesisHash", nil, &res); err != nil {
+		return "", err
+	}
+	return res, nil
 }
 
 func (r *RpcClient) GetHighestSnapshotSlot() (solana.HighestSnapshotSlot, error) {
-	return solana.HighestSnapshotSlot{}, nil
+	var res solana.HighestSnapshotSlot
+	if err := r.send("getHighestSnapshotSlot", nil, &res); err != nil {
+		return solana.HighestSnapshotSlot{}, err
+	}
+
+	return res, nil
 }
 
 func (r *RpcClient) GetLeaderSchedule(slot *uint, config ...solana.GetLeaderScheduleConfig) (*solana.LeaderSchedule, error) {
-	return nil, nil
+	var res *solana.LeaderSchedule
+	params := []interface{}{slot}
+	if len(config) > 0 {
+		params = append(params, config[0])
+	}
+	if err := r.send("getLeaderSchedule", params, &res); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
-func (r *RpcClient) GetMaxRetransmitSlots() (uint, error) {
-	return 0, nil
+func (r *RpcClient) GetMaxRetransmitSlot() (uint, error) {
+	var res uint
+	if err := r.send("getMaxRetransmitSlot", nil, &res); err != nil {
+		return 0, err
+	}
+	return res, nil
 }
 
 func (r *RpcClient) GetMaxShredInsertSlot() (uint, error) {
-	return 0, nil
+	var res uint
+	if err := r.send("getMaxShredInsertSlot", nil, &res); err != nil {
+		return 0, err
+	}
+	return res, nil
 }
 
 func (r *RpcClient) GetRecentPerformanceSamples(limit uint) ([]solana.PerformanceSample, error) {
-	return nil, nil
+	var res []solana.PerformanceSample
+	params := []interface{}{limit}
+	if err := r.send("getRecentPerformanceSamples", params, &res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
-func (r *RpcClient) GetRecentPrioritizationFees(addresses []string) (solana.PrioritizationFee, error) {
-	return solana.PrioritizationFee{}, nil
+func (r *RpcClient) GetRecentPrioritizationFees(addresses []solana.Pubkey) ([]solana.PrioritizationFee, error) {
+	var res []solana.PrioritizationFee
+	params := []interface{}{}
+	if len(addresses) > 0 {
+		strs := make([]string, len(addresses))
+		for i, address := range addresses {
+			strs[i] = address.String()
+		}
+		params = append(params, strs)
+	}
+	if err := r.send("getRecentPrioritizationFees", params, &res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (r *RpcClient) GetSlot(config ...solana.StandardRpcConfig) (uint, error) {
-	return 0, nil
+	var res uint
+	params := []interface{}{}
+	if len(config) > 0 {
+		params = append(params, config[0])
+	}
+	if err := r.send("getSlot", params, &res); err != nil {
+		return 0, err
+	}
+	return res, nil
 }
 
-func (r *RpcClient) GetSlotLeader(config ...solana.StandardRpcConfig) (string, error) {
-	return "", nil
+func (r *RpcClient) GetSlotLeader(config ...solana.StandardRpcConfig) (solana.Pubkey, error) {
+	var res keypair.Pubkey
+	params := []interface{}{}
+	if len(config) > 0 {
+		params = append(params, config[0])
+	}
+	if err := r.send("getSlotLeader", params, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
-func (r *RpcClient) GetSlotLeaders(start, end uint) ([]string, error) {
-	return nil, nil
+func (r *RpcClient) GetSlotLeaders(start, limit *uint) ([]solana.Pubkey, error) {
+	var res []keypair.Pubkey
+	params := []interface{}{start, limit}
+	if err := r.send("getSlotLeaders", params, &res); err != nil {
+		return nil, err
+	}
+	var pubkeys []solana.Pubkey
+	for _, pubkey := range res {
+		pubkeys = append(pubkeys, &pubkey)
+	}
+	return pubkeys, nil
 }
 
 func (r *RpcClient) GetTransactionCount(config ...solana.StandardRpcConfig) (uint, error) {
-	return 0, nil
+	var res uint
+	params := []interface{}{}
+	if len(config) > 0 {
+		params = append(params, config[0])
+	}
+	if err := r.send("getTransactionCount", params, &res); err != nil {
+		return 0, err
+	}
+	return res, nil
 }
 
 func (r *RpcClient) GetVoteAccounts(config ...solana.GetVoteAccountsConfig) (solana.VoteAccounts, error) {
-	return solana.VoteAccounts{}, nil
+	var res solana.VoteAccounts
+	params := []interface{}{}
+	if len(config) > 0 {
+		params = append(params, config[0])
+	}
+	if err := r.send("getVoteAccounts", params, &res); err != nil {
+		return solana.VoteAccounts{}, err
+	}
+	return res, nil
 }
 
 func (r *RpcClient) MinimumLedgerSlot() (uint, error) {
-	return 0, nil
+	var res uint
+	if err := r.send("minimumLedgerSlot", nil, &res); err != nil {
+		return 0, err
+	}
+	return res, nil
 }

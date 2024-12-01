@@ -1,6 +1,9 @@
 package solana
 
-import "math/big"
+import (
+	"math/big"
+	"time"
+)
 
 type Rpc interface {
 	GetAccountInfo(address Pubkey, config ...GetAccountInfoConfig) (*EncodedAccount, error)                                                              //Returns all information associated with the account of provided Pubkey
@@ -9,7 +12,7 @@ type Rpc interface {
 	GetBlockCommitment(slotNumber uint) (BlockCommitment, error)                                                                                         //Returns the current block height and the estimated production time of a block
 	GetBlockHeight(config ...StandardRpcConfig) (uint, error)                                                                                            //Returns the current block height of the node
 	GetBlockProduction(config ...GetBlockProductionConfig) (BlockProduction, error)                                                                      //Returns recent block production information from the current or previous epoch.
-	GetBlockTime(slotNumber uint) (int, error)                                                                                                           //Returns the estimated production time of a block as a unix timestamp.
+	GetBlockTime(slotNumber uint) (time.Time, error)                                                                                                     //Returns the estimated production time of a block as a unix timestamp.
 	GetBlocks(startSlot uint, endSlot *uint, config ...GetBlockConfig) ([]uint, error)                                                                   //Returns a list of confirmed blocks between two slots
 	GetBlocksWithLimit(startSlot uint, limit uint, config ...GetBlockConfig) ([]uint, error)                                                             //Returns a list of confirmed blocks starting at the given slot
 	GetClusterNodes() ([]ClusterNode, error)                                                                                                             //Returns information about all the nodes participating in the cluster
@@ -27,18 +30,18 @@ type Rpc interface {
 	GetLargestAccounts(config ...GetLargestAccountsConfig) ([]AccountWithBalance, error)                                                                 //Returns the 20 largest accounts, by lamport balance (results may be cached up to two hours)
 	GetLatestBlockhash(config ...StandardRpcConfig) (LatestBlockhash, error)                                                                             //Returns the latest blockhash. NOTE: This method is only available in solana-core v1.9 or newer. Please use getRecentBlockhash for solana-core v1.8 and below.
 	GetLeaderSchedule(slot *uint, config ...GetLeaderScheduleConfig) (*LeaderSchedule, error)                                                            //Returns the leader schedule for an epoch
-	GetMaxRetransmitSlots() (uint, error)                                                                                                                //Get the max slot seen from retransmit stage.
+	GetMaxRetransmitSlot() (uint, error)                                                                                                                 //Get the max slot seen from retransmit stage.
 	GetMaxShredInsertSlot() (uint, error)                                                                                                                //Get the max slot seen from after shred insert.
 	GetMinimumBalanceForRentExemption(accountDataLength uint, config ...StandardCommitmentConfig) (uint, error)                                          //Returns minimum balance required to make account rent exempt.
 	GetMultipleAccounts(pubkeys []Pubkey, config ...GetAccountInfoConfig) ([]*EncodedAccount, error)                                                     //Returns the account information for a list of Pubkeys.
 	GetProgramAccounts(programPubkey Pubkey, config ...GetAccountInfoConfig) ([]EncodedAccount, error)                                                   //Returns all accounts owned by the provided program Pubkey
 	GetRecentPerformanceSamples(limit uint) ([]PerformanceSample, error)                                                                                 //Returns a list of recent performance samples, in reverse slot order. Performance samples are taken every 60 seconds and include the number of transactions and slots that occur in a given time window. -- NOTE max limit is 720
-	GetRecentPrioritizationFees(addresses []string) (PrioritizationFee, error)                                                                           //Returns a list of prioritization fees from recent blocks.
+	GetRecentPrioritizationFees(addresses []Pubkey) ([]PrioritizationFee, error)                                                                         //Returns a list of prioritization fees from recent blocks.
 	GetSignatureStatuses(signatures []string, config ...GetSignatureStatusesConfig) ([]*SignatureStatus, error)                                          //Returns the statuses of a list of signatures. Each signature must be a txid, the first signature of a transaction. Unless the searchTransactionHistory configuration parameter is included, this method only searches the recent status cache of signatures, which retains statuses for all active slots plus MAX_RECENT_BLOCKHASHES rooted slots.
 	GetSignaturesForAddress(address Pubkey, config ...GetSignaturesForAddressConfig) ([]TransactionSignature, error)                                     //Returns signatures for confirmed transactions that include the given address in their accountKeys list. Returns signatures backwards in time from the provided signature or most recent confirmed block
 	GetSlot(config ...StandardRpcConfig) (uint, error)                                                                                                   //Returns the slot that has reached the given or default commitment level
-	GetSlotLeader(config ...StandardRpcConfig) (string, error)                                                                                           //Returns the current slot leader
-	GetSlotLeaders(start, end uint) ([]string, error)                                                                                                    //Returns the slot leaders for a given slot range
+	GetSlotLeader(config ...StandardRpcConfig) (Pubkey, error)                                                                                           //Returns the current slot leader
+	GetSlotLeaders(start, limit *uint) ([]Pubkey, error)                                                                                                 //Returns the slot leaders for a given slot range
 	GetStakeMinimumDelegation(config ...StandardCommitmentConfig) (uint, error)                                                                          //Returns the stake minimum delegation, in lamports.
 	GetSupply(config ...GetSupplyConfig) (Supply, error)                                                                                                 //Returns information about the current supply.
 	GetTokenAccountBalance(address Pubkey, config ...StandardCommitmentConfig) (UiTokenAmount, error)                                                    //Returns the token balance of an SPL Token account.
