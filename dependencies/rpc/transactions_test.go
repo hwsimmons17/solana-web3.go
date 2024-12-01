@@ -55,7 +55,7 @@ func TestGetTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Fatal(tx)
+	t.Fatalf("%+v", tx)
 }
 
 func TestIsBlockhashValid(t *testing.T) {

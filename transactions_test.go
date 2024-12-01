@@ -110,3 +110,29 @@ func TestTransaction(t *testing.T) {
 		t.Fatal("Unexpected account writable")
 	}
 }
+
+func TestRawTxToTransaction(t *testing.T) {
+	rawTx := RawTransaction{
+		Message: RawMessage{
+			AccountKeys: []Pubkey{
+				MustParsePubkey("GR16g49y2fEjRQD612ryaXjNomRF2TCWoiMgspKtXqya"),
+				MustParsePubkey("uaRGm8MX21msZNqwW3AQWYBXheLPcheK6CZmdx788uN"),
+				MustParsePubkey("7Fg8XQBVY4z7gPzecGo7abbHZbHj3iFfGozXsz1VcvKk"),
+				MustParsePubkey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+				MustParsePubkey("BLrD8HqBy4vKNvkb28Bijg4y6s8tE49jyVFbfZnmesjY")},
+			Header: MessageHeader{NumReadonlySignedAccounts: 0, NumReadonlyUnsignedAccounts: 2, NumRequiredSignatures: 1},
+			Instructions: []RawInstruction{{
+				Accounts:       []int{2, 4, 1, 0},
+				Data:           []byte{12, 0, 16, 141, 190, 28, 0, 0, 0, 9},
+				ProgramIDIndex: 3,
+			}},
+			RecentBlockhash: "FLwNEQozzqBBaeHf17JA83PUi3GPEJZkneDm548wMUSj"},
+		Signatures: []string{"2WPaFF2Jy51ioWknrfAaraueRLwbJfo5ciEgK9t2ccNvR6LQiT7UarkQTH4EKpXw9TRVce9dMrDiuANYMQzE6sTg"}}
+
+	tx, err := rawTx.Transaction()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Fatalf("%+v", tx)
+}
