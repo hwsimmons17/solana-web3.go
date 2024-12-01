@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"solana"
 	"solana/dependencies/keypair"
@@ -127,8 +126,6 @@ func (r *RpcClient) send(method string, params []interface{}, res interface{}) e
 		return err
 	}
 
-	log.Println(result)
-
 	if result.Error != nil {
 		return fmt.Errorf("rpc request failed. Code: %d, Message: %s, Data: %v", result.Error.Code, result.Error.Message, result.Error.Data)
 	}
@@ -139,11 +136,9 @@ func (r *RpcClient) send(method string, params []interface{}, res interface{}) e
 
 	resJson, err := json.Marshal(result.Result)
 	if err != nil {
-		log.Println(result.Result)
 		return err
 	}
 	if err := json.Unmarshal(resJson, res); err != nil {
-		log.Println(string(resJson))
 		return err
 	}
 
