@@ -127,6 +127,8 @@ func (r *RpcClient) send(method string, params []interface{}, res interface{}) e
 		return err
 	}
 
+	log.Println(result)
+
 	if result.Error != nil {
 		return fmt.Errorf("rpc request failed. Code: %d, Message: %s, Data: %v", result.Error.Code, result.Error.Message, result.Error.Data)
 	}
