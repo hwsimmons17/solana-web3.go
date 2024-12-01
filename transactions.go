@@ -3,12 +3,17 @@ package solana
 type TransactionWithMeta struct {
 	Meta        *TransactionMeta `json:"meta"`
 	Version     *int             `json:"version"` //Transaction version. Undefined if maxSupportedTransactionVersion is not set in request params. --note can also be "legacy"
-	Transaction Transaction      `json:"transaction"`
+	Transaction RawTransaction   `json:"transaction"`
 }
 
 type Transaction struct {
-	Message    TransactionMessage `json:"message"`
 	Signatures []string           `json:"signatures"`
+	Message    TransactionMessage `json:"message"`
+}
+
+type RawTransaction struct {
+	Message    RawTransactionMessage `json:"message"`
+	Signatures []string              `json:"signatures"`
 }
 
 type TransactionMeta struct {
@@ -27,17 +32,34 @@ type TransactionMeta struct {
 	ComputeUnitsConsumed *uint                  `json:"computeUnitsConsumed"` //The number of compute units consumed during the execution of the transaction
 }
 
-type TransactionMessage struct {
-	AccountKeys     []Pubkey                 `json:"accountKeys"`
-	Header          TransactionHeader        `json:"header"`
-	Instructions    []TransactionInstruction `json:"instructions"`
-	RecentBlockhash string                   `json:"recentBlockhash"`
+type RawTransactionMessage struct {
+	AccountKeys     []Pubkey          `json:"accountKeys"`
+	Header          TransactionHeader `json:"header"`
+	Instructions    []RawInstruction  `json:"instructions"`
+	RecentBlockhash string            `json:"recentBlockhash"`
 }
 
-type TransactionInstruction struct {
+type TransactionMessage struct {
+	Instructions    []Instruction `json:"instructions"`
+	RecentBlockhash string        `json:"recentBlockhash"`
+}
+
+type RawInstruction struct {
 	Accounts       []int  `json:"accounts"`
 	Data           []byte `json:"data"`
 	ProgramIDIndex int    `json:"programIdIndex"`
+}
+
+type Instruction struct {
+	Accounts  []InstructionAccount `json:"accounts"`
+	Data      []byte               `json:"data"`
+	ProgramID Pubkey               `json:"programId"`
+}
+
+type InstructionAccount struct {
+	Pubkey   Pubkey `json:"pubkey"`   //Public key of the account
+	Signer   bool   `json:"signer"`   //Boolean indicating if the account is a signer
+	Writable bool   `json:"writable"` //Boolean indicating if the account is writable
 }
 
 type TransactionHeader struct {
@@ -48,8 +70,8 @@ type TransactionHeader struct {
 
 // The Solana runtime records the cross-program instructions that are invoked during transaction processing and makes these available for greater transparency of what was executed on-chain per transaction instruction. Invoked instructions are grouped by the originating transaction instruction and are listed in order of processing.
 type InnerInstructions struct {
-	Index        int                      `json:"index"`        //Index of the transaction instruction from which the inner instruction(s) originated
-	Instructions []TransactionInstruction `json:"instructions"` //Ordered list of inner program instructions that were invoked during a single transaction instruction.
+	Index        int              `json:"index"`        //Index of the transaction instruction from which the inner instruction(s) originated
+	Instructions []RawInstruction `json:"instructions"` //Ordered list of inner program instructions that were invoked during a single transaction instruction.
 }
 
 type TransactionReward struct {

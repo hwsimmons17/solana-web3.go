@@ -49,7 +49,7 @@ func (a *encodedAccount) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (r *RpcClient) GetAccountInfo(address solana.Pubkey, config ...solana.GetAccountInfoConfig) (*solana.EncodedAccount, error) { //Returns all information associated with the account of provided Pubkey
+func (r *RpcClient) GetAccountInfo(address solana.Pubkey, config ...solana.GetAccountInfoConfig) (*solana.Account, error) { //Returns all information associated with the account of provided Pubkey
 	var res struct {
 		Value *encodedAccount `json:"value"`
 	}
@@ -71,7 +71,7 @@ func (r *RpcClient) GetAccountInfo(address solana.Pubkey, config ...solana.GetAc
 		return nil, nil
 	}
 
-	return &solana.EncodedAccount{
+	return &solana.Account{
 		Address:    address,
 		Data:       res.Value.Data,
 		Executable: res.Value.Executable,
@@ -129,7 +129,7 @@ func (r *RpcClient) GetMinimumBalanceForRentExemption(accountDataLength uint, co
 	return res, nil
 }
 
-func (r *RpcClient) GetMultipleAccounts(pubkeys []solana.Pubkey, config ...solana.GetAccountInfoConfig) ([]*solana.EncodedAccount, error) {
+func (r *RpcClient) GetMultipleAccounts(pubkeys []solana.Pubkey, config ...solana.GetAccountInfoConfig) ([]*solana.Account, error) {
 	var res struct {
 		Value []*encodedAccount `json:"value"`
 	}
@@ -146,13 +146,13 @@ func (r *RpcClient) GetMultipleAccounts(pubkeys []solana.Pubkey, config ...solan
 	if err := r.send("getMultipleAccounts", params, &res); err != nil {
 		return nil, err
 	}
-	var accounts []*solana.EncodedAccount
+	var accounts []*solana.Account
 	for _, value := range res.Value {
 		if value == nil {
 			accounts = append(accounts, nil)
 			continue
 		}
-		accounts = append(accounts, &solana.EncodedAccount{
+		accounts = append(accounts, &solana.Account{
 			Address:    &value.Address,
 			Data:       value.Data,
 			Executable: value.Executable,
@@ -166,7 +166,7 @@ func (r *RpcClient) GetMultipleAccounts(pubkeys []solana.Pubkey, config ...solan
 	return accounts, nil
 }
 
-func (r *RpcClient) GetProgramAccounts(programPubkey solana.Pubkey, config ...solana.GetAccountInfoConfig) ([]solana.EncodedAccount, error) {
+func (r *RpcClient) GetProgramAccounts(programPubkey solana.Pubkey, config ...solana.GetAccountInfoConfig) ([]solana.Account, error) {
 	var res []encodedAccount
 
 	//Set the encoding to base64 no matter what
@@ -182,9 +182,9 @@ func (r *RpcClient) GetProgramAccounts(programPubkey solana.Pubkey, config ...so
 		return nil, err
 	}
 
-	var accounts []solana.EncodedAccount
+	var accounts []solana.Account
 	for _, account := range res {
-		accounts = append(accounts, solana.EncodedAccount{
+		accounts = append(accounts, solana.Account{
 			Address:    &account.Address,
 			Data:       account.Data,
 			Executable: account.Executable,

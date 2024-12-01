@@ -19,7 +19,7 @@ func (r *RpcClient) GetTokenAccountBalance(address solana.Pubkey, config ...sola
 	return res.Value, nil
 }
 
-func (r *RpcClient) GetTokenAccountsByDelegate(delegateAddress solana.Pubkey, opts solana.GetTokenAccountsByDelegateConfig, config ...solana.GetAccountInfoConfig) ([]solana.EncodedAccount, error) {
+func (r *RpcClient) GetTokenAccountsByDelegate(delegateAddress solana.Pubkey, opts solana.GetTokenAccountsByDelegateConfig, config ...solana.GetAccountInfoConfig) ([]solana.Account, error) {
 	var res struct {
 		Value []struct {
 			Account encodedAccount `json:"account"`
@@ -38,14 +38,14 @@ func (r *RpcClient) GetTokenAccountsByDelegate(delegateAddress solana.Pubkey, op
 		return nil, err
 	}
 
-	var accounts []solana.EncodedAccount
+	var accounts []solana.Account
 	for _, account := range res.Value {
 		pubkey, err := keypair.ParsePubkey(account.Pubkey)
 		if err != nil {
 			return nil, err
 		}
 
-		accounts = append(accounts, solana.EncodedAccount{
+		accounts = append(accounts, solana.Account{
 			Address:    pubkey,
 			Data:       account.Account.Data,
 			Executable: account.Account.Executable,
@@ -58,7 +58,7 @@ func (r *RpcClient) GetTokenAccountsByDelegate(delegateAddress solana.Pubkey, op
 	return accounts, nil
 }
 
-func (r *RpcClient) GetTokenAccountsByOwner(ownerAddress solana.Pubkey, opts solana.GetTokenAccountsByDelegateConfig, config ...solana.GetAccountInfoConfig) ([]solana.EncodedAccount, error) {
+func (r *RpcClient) GetTokenAccountsByOwner(ownerAddress solana.Pubkey, opts solana.GetTokenAccountsByDelegateConfig, config ...solana.GetAccountInfoConfig) ([]solana.Account, error) {
 	var res struct {
 		Value []struct {
 			Account encodedAccount `json:"account"`
@@ -77,14 +77,14 @@ func (r *RpcClient) GetTokenAccountsByOwner(ownerAddress solana.Pubkey, opts sol
 		return nil, err
 	}
 
-	var accounts []solana.EncodedAccount
+	var accounts []solana.Account
 	for _, account := range res.Value {
 		pubkey, err := keypair.ParsePubkey(account.Pubkey)
 		if err != nil {
 			return nil, err
 		}
 
-		accounts = append(accounts, solana.EncodedAccount{
+		accounts = append(accounts, solana.Account{
 			Address:    pubkey,
 			Data:       account.Account.Data,
 			Executable: account.Account.Executable,
