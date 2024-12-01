@@ -49,7 +49,7 @@ type Rpc interface {
 	GetTokenAccountsByOwner(ownerAddress Pubkey, opts GetTokenAccountsByDelegateConfig, config ...GetAccountInfoConfig) ([]Account, error)       //Returns all SPL Token accounts by token owner.
 	GetTokenLargestAccounts(mintAddress Pubkey, config ...StandardCommitmentConfig) ([]UiTokenAmount, error)                                     //Returns the 20 largest accounts of a particular SPL Token type.
 	GetTokenSupply(mintAddress Pubkey, config ...StandardCommitmentConfig) (UiTokenAmount, error)                                                //Returns the total supply of an SPL Token type.
-	GetTransaction(transactionSignature string, config ...GetTransactionSignatureConfig) (*RawTransactionWithMeta, error)                        //Returns transaction details for a confirmed transaction
+	GetTransaction(transactionSignature string, config ...GetTransactionSignatureConfig) (*TransactionWithMeta, error)                           //Returns transaction details for a confirmed transaction
 	GetTransactionCount(config ...StandardRpcConfig) (uint, error)                                                                               //Returns the current transaction count from the ledger
 	GetVersion() (Version, error)                                                                                                                //Returns the current Solana version running on the node
 	GetVoteAccounts(config ...GetVoteAccountsConfig) (VoteAccounts, error)                                                                       //Returns the account info and associated stake for all the voting accounts in the current bank.
@@ -247,14 +247,14 @@ type DataSlice struct {
 }
 
 type Block struct {
-	BlockHeight       *int                     `json:"blockHeight"`       //The number of blocks beneath this block
-	BlockTime         *int                     `json:"blockTime"`         //Estimated production time, as Unix timestamp (seconds since the Unix epoch). null if not available
-	Blockhash         string                   `json:"blockhash"`         //The blockhash of this block, as base-58 encoded string
-	ParentSlot        uint                     `json:"parentSlot"`        //The slot index of this block's parent
-	PreviousBlockhash string                   `json:"previousBlockhash"` //The blockhash of this block's parent, as base-58 encoded string; if the parent block is not available due to ledger cleanup, this field will return "11111111111111111111111111111111"
-	Transactions      []RawTransactionWithMeta `json:"transactions"`      //The list of transactions included in this block
-	Signatures        []string                 `json:"signatures"`        //Present if "signatures" are requested for transaction details; an array of signatures strings, corresponding to the transaction order in the block
-	Rewards           []TransactionReward      `json:"rewards"`           //Block-level rewards, present if rewards are requested; an array of JSON objects containing:
+	BlockHeight       *int                  `json:"blockHeight"`       //The number of blocks beneath this block
+	BlockTime         *int                  `json:"blockTime"`         //Estimated production time, as Unix timestamp (seconds since the Unix epoch). null if not available
+	Blockhash         string                `json:"blockhash"`         //The blockhash of this block, as base-58 encoded string
+	ParentSlot        uint                  `json:"parentSlot"`        //The slot index of this block's parent
+	PreviousBlockhash string                `json:"previousBlockhash"` //The blockhash of this block's parent, as base-58 encoded string; if the parent block is not available due to ledger cleanup, this field will return "11111111111111111111111111111111"
+	Transactions      []TransactionWithMeta `json:"transactions"`      //The list of transactions included in this block
+	Signatures        []string              `json:"signatures"`        //Present if "signatures" are requested for transaction details; an array of signatures strings, corresponding to the transaction order in the block
+	Rewards           []TransactionReward   `json:"rewards"`           //Block-level rewards, present if rewards are requested; an array of JSON objects containing:
 }
 
 type BlockCommitment struct {
@@ -430,3 +430,25 @@ const (
 	RewardTypeVoting  RewardType = "voting"
 	RewardTypeStaking RewardType = "staking"
 )
+
+type TransactionWithMeta struct {
+	Meta        *TransactionMeta `json:"meta"`
+	Version     *int             `json:"version"` //Transaction version. Undefined if maxSupportedTransactionVersion is not set in request params. --note can also be "legacy"
+	Transaction Transaction      `json:"transaction"`
+}
+
+type TransactionMeta struct {
+	Err                  any                    `json:"err"`                  //Error if transaction failed, null if transaction succeeded. TransactionError definitions
+	Fee                  uint                   `json:"fee"`                  //Ree this transaction was charged, as u64 integer
+	InnerInstructions    []InnerInstructions    `json:"innerInstructions"`    //List of inner instructions or null if inner instruction recording was not enabled during this transaction
+	LogMessages          []string               `json:"logMessages"`          //Array of string log messages or null if log message recording was not enabled during this transaction
+	PostBalances         []uint                 `json:"postBalances"`         //Array of u64 account balances after the transaction was processed
+	PostTokenBalances    []TokenBalance         `json:"postTokenBalances"`    //List of token balances from after the transaction was processed or omitted if token balance recording was not yet enabled during this transaction
+	PreBalances          []uint                 `json:"preBalances"`          //Array of u64 account balances from before the transaction was processed
+	PreTokenBalances     []TokenBalance         `json:"preTokenBalances"`     //List of token balances from before the transaction was processed or omitted if token balance recording was not yet enabled during this transaction
+	Rewards              []TransactionReward    `json:"rewards"`              //Transaction-level rewards, populated if rewards are requested; an array of JSON objects containing:
+	Status               TransactionStatus      `json:"status"`               //Deprecated: Transaction status
+	LoadedAddresses      LoadedAddresses        `json:"loadedAddresses"`      //Transaction addresses loaded from address lookup tables. Undefined if maxSupportedTransactionVersion is not set in request params, or if jsonParsed encoding is set in request params.
+	ReturnData           *TransactionReturnData `json:"returnData"`           //The most-recent return data generated by an instruction in the transaction.
+	ComputeUnitsConsumed *uint                  `json:"computeUnitsConsumed"` //The number of compute units consumed during the execution of the transaction
+}

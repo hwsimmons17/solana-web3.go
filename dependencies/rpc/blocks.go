@@ -38,7 +38,7 @@ func (r *RpcClient) GetBlock(slotNumber uint, config ...solana.GetBlockConfig) (
 		return nil, nil
 	}
 
-	var txs []solana.RawTransactionWithMeta
+	var txs []solana.TransactionWithMeta
 	for _, encodedTransaction := range res.Transactions {
 		if len(encodedTransaction.Transaction) == 0 {
 			return nil, errors.New("transaction not found")
@@ -47,15 +47,19 @@ func (r *RpcClient) GetBlock(slotNumber uint, config ...solana.GetBlockConfig) (
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode transaction data: %v", err)
 		}
-		transaction, err := solana.ParseTransactionData(transactionData)
+		rawTx, err := solana.ParseTransactionData(transactionData)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse transaction data: %v", err)
 		}
+		tx, err := rawTx.Transaction()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse transaction: %v", err)
+		}
 
-		txs = append(txs, solana.RawTransactionWithMeta{
+		txs = append(txs, solana.TransactionWithMeta{
 			Meta:        encodedTransaction.Meta,
 			Version:     encodedTransaction.Version,
-			Transaction: transaction,
+			Transaction: tx,
 		})
 	}
 

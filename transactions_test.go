@@ -40,7 +40,7 @@ func TestRawTransaction(t *testing.T) {
 		Message: Message{
 			Instructions: []Instruction{
 				{
-					Accounts: []InstructionAccount{
+					Accounts: []AccountMeta{
 						{
 							Pubkey:   MustParsePubkey("2u83Dx5qPV4QnujjJQv8v2SoqG1ixuAxPK5Jwhtkovd1"),
 							Signer:   false,
