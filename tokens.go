@@ -9,8 +9,8 @@ type TokenBalance struct {
 }
 
 type UiTokenAmount struct {
-	Amount         string `json:"amount"`         //Raw amount of tokens as a string, ignoring decimals.
-	Decimals       int    `json:"decimals"`       //Number of decimals configured for token's mint.
-	UiAmountString string `json:"uiAmountString"` //Token amount as a string, accounting for decimals.
-	UiAmount       string `json:"uiAmount"`       //Deprecated: Token amount as a float, accounting for decimals.
+	Amount         string  `json:"amount"`         //Raw amount of tokens as a string, ignoring decimals.
+	Decimals       int     `json:"decimals"`       //Number of decimals configured for token's mint.
+	UiAmountString string  `json:"uiAmountString"` //Token amount as a string, accounting for decimals.
+	UiAmount       float64 `json:"uiAmount"`       //Deprecated: Token amount as a float, accounting for decimals.
 }
