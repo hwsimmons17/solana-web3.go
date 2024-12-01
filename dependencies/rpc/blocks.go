@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"solana"
-	"solana/dependencies/transactions"
 	"time"
 )
 
@@ -48,7 +47,7 @@ func (r *RpcClient) GetBlock(slotNumber uint, config ...solana.GetBlockConfig) (
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode transaction data: %v", err)
 		}
-		transaction, err := transactions.ParseTransactionData(transactionData)
+		transaction, err := solana.ParseTransactionData(transactionData)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse transaction data: %v", err)
 		}

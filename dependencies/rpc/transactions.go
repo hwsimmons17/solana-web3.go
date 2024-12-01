@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"solana"
-	"solana/dependencies/transactions"
 )
 
 type encodedTransaction struct {
@@ -91,7 +90,7 @@ func (r *RpcClient) GetTransaction(transactionSignature string, config ...solana
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode transaction data: %v", err)
 	}
-	transaction, err := transactions.ParseTransactionData(transactionData)
+	transaction, err := solana.ParseTransactionData(transactionData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse transaction data: %v", err)
 	}

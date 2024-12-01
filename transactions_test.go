@@ -1,4 +1,4 @@
-package transactions
+package solana
 
 import (
 	"slices"
@@ -25,11 +25,88 @@ func TestToData(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	newData, err := ToData(transaction)
+	newData, err := transaction.Data()
 	if err != nil {
 		t.Fatal(err)
 	}
 	if slices.Compare(data, newData) != 0 {
 		t.Fatal("Data does not match")
+	}
+}
+
+func TestRawTransaction(t *testing.T) {
+	tx := Transaction{
+		Signatures: []string{"5WUMzKkDaSuLUj3RpbufHi2PLRPgkjkHhsJpLE7Q3a3fMNDkV579zDmWLfMTnw4my5cbHKicRhYDTQsoAidv8nYD"},
+		Message: Message{
+			Instructions: []Instruction{
+				{
+					Accounts: []InstructionAccount{
+						{
+							Pubkey:   MustParsePubkey("2u83Dx5qPV4QnujjJQv8v2SoqG1ixuAxPK5Jwhtkovd1"),
+							Signer:   false,
+							Writable: false,
+						},
+						{
+							Pubkey:   MustParsePubkey("BrX9Z85BbmXYMjvvuAWU8imwsAqutVQiDg9uNfTGkzrJ"),
+							Signer:   true,
+							Writable: true,
+						}},
+					Data:      []byte{12, 0, 0, 0, 115},
+					ProgramID: MustParsePubkey("Vote111111111111111111111111111111111111111"),
+				},
+			},
+			RecentBlockhash: "5X8Ak8LYQTdoXbDaEYUdBC5dZophA7fNbiSEgMFYd1Qa",
+		},
+	}
+
+	rawTx := tx.RawTransaction()
+	if rawTx.Message.AccountKeys[0].String() != "BrX9Z85BbmXYMjvvuAWU8imwsAqutVQiDg9uNfTGkzrJ" {
+		t.Fatal("Unexpected account key")
+	}
+}
+
+func TestTransaction(t *testing.T) {
+	rawTx := RawTransaction{
+		Message: RawMessage{
+			AccountKeys: []Pubkey{
+				MustParsePubkey("BrX9Z85BbmXYMjvvuAWU8imwsAqutVQiDg9uNfTGkzrJ"),
+				MustParsePubkey("2u83Dx5qPV4QnujjJQv8v2SoqG1ixuAxPK5Jwhtkovd1"),
+				MustParsePubkey("Vote111111111111111111111111111111111111111"),
+			},
+			Header: MessageHeader{
+				NumReadonlySignedAccounts:   0,
+				NumReadonlyUnsignedAccounts: 1,
+				NumRequiredSignatures:       1,
+			},
+			Instructions: []RawInstruction{
+				{
+					Accounts:       []int{1, 0},
+					Data:           []byte{12, 0, 0, 0, 115},
+					ProgramIDIndex: 2,
+				},
+			},
+			RecentBlockhash: "5X8Ak8LYQTdoXbDaEYUdBC5dZophA7fNbiSEgMFYd1Qa",
+		},
+		Signatures: []string{"5WUMzKkDaSuLUj3RpbufHi2PLRPgkjkHhsJpLE7Q3a3fMNDkV579zDmWLfMTnw4my5cbHKicRhYDTQsoAidv8nYD"},
+	}
+	tx, err := rawTx.Transaction()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if tx.Message.Instructions[0].Accounts[0].Pubkey.String() != "2u83Dx5qPV4QnujjJQv8v2SoqG1ixuAxPK5Jwhtkovd1" {
+		t.Fatal("Unexpected account")
+	}
+	if tx.Message.Instructions[0].Accounts[0].Signer {
+		t.Fatal("Unexpected account signer")
+	}
+	if !tx.Message.Instructions[0].Accounts[0].Writable {
+		t.Fatal("Unexpected account writable")
+	}
+	if !tx.Message.Instructions[0].Accounts[1].Signer {
+		t.Fatal("Unexpected account signer")
+	}
+	if !tx.Message.Instructions[0].Accounts[1].Writable {
+		t.Fatal("Unexpected account writable")
 	}
 }
