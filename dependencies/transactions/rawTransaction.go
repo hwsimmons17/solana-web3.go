@@ -3,7 +3,6 @@ package transactions
 import (
 	"errors"
 	"solana"
-	"solana/dependencies/keypair"
 
 	"github.com/mr-tron/base58"
 )
@@ -94,7 +93,7 @@ func getAccounts(data []byte) ([]solana.Pubkey, []byte, error) {
 	accounts := make([]solana.Pubkey, totalNumAccounts)
 	for i := 0; i < int(totalNumAccounts); i++ {
 		accountData := data[i*32 : (i+1)*32]
-		pubkey, err := keypair.ParsePubkeyBytes(accountData)
+		pubkey, err := solana.ParsePubkeyBytes(accountData)
 		if err != nil {
 			return nil, nil, err
 		}

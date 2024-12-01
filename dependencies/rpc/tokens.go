@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"solana"
-	"solana/dependencies/keypair"
 )
 
 func (r *RpcClient) GetTokenAccountBalance(address solana.Pubkey, config ...solana.StandardCommitmentConfig) (solana.UiTokenAmount, error) {
@@ -40,7 +39,7 @@ func (r *RpcClient) GetTokenAccountsByDelegate(delegateAddress solana.Pubkey, op
 
 	var accounts []solana.Account
 	for _, account := range res.Value {
-		pubkey, err := keypair.ParsePubkey(account.Pubkey)
+		pubkey, err := solana.ParsePubkey(account.Pubkey)
 		if err != nil {
 			return nil, err
 		}
@@ -79,7 +78,7 @@ func (r *RpcClient) GetTokenAccountsByOwner(ownerAddress solana.Pubkey, opts sol
 
 	var accounts []solana.Account
 	for _, account := range res.Value {
-		pubkey, err := keypair.ParsePubkey(account.Pubkey)
+		pubkey, err := solana.ParsePubkey(account.Pubkey)
 		if err != nil {
 			return nil, err
 		}

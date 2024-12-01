@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"solana"
-	"solana/dependencies/keypair"
 	"testing"
 )
 
@@ -42,7 +41,7 @@ func TestGetSignatureStatuses(t *testing.T) {
 func TestGetSignaturesForAddress(t *testing.T) {
 	t.Skip("Skipping test that requires network access")
 	client := NewRpcClient(solana.RpcEndpointDevnet)
-	signatures, err := client.GetSignaturesForAddress(keypair.MustParsePubkey("7Fg8XQBVY4z7gPzecGo7abbHZbHj3iFfGozXsz1VcvKk"))
+	signatures, err := client.GetSignaturesForAddress(solana.MustParsePubkey("7Fg8XQBVY4z7gPzecGo7abbHZbHj3iFfGozXsz1VcvKk"))
 	if err != nil {
 		t.Fatal(err)
 	}

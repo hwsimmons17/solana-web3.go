@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"solana"
-	"solana/dependencies/keypair"
 	"solana/dependencies/transactions"
 	"time"
 )
@@ -263,7 +262,7 @@ func (r *RpcClient) GetSlot(config ...solana.StandardRpcConfig) (uint, error) {
 }
 
 func (r *RpcClient) GetSlotLeader(config ...solana.StandardRpcConfig) (solana.Pubkey, error) {
-	var res keypair.Pubkey
+	var res solana.PubkeyStr
 	params := []interface{}{}
 	if len(config) > 0 {
 		params = append(params, config[0])
@@ -275,7 +274,7 @@ func (r *RpcClient) GetSlotLeader(config ...solana.StandardRpcConfig) (solana.Pu
 }
 
 func (r *RpcClient) GetSlotLeaders(start, limit *uint) ([]solana.Pubkey, error) {
-	var res []keypair.Pubkey
+	var res []solana.PubkeyStr
 	params := []interface{}{start, limit}
 	if err := r.send("getSlotLeaders", params, &res); err != nil {
 		return nil, err

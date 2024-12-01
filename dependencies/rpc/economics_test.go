@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"solana"
-	"solana/dependencies/keypair"
 	"testing"
 )
 
@@ -29,7 +28,7 @@ func TestGetInflationRate(t *testing.T) {
 func TestGetInflationReward(t *testing.T) {
 	t.Skip("Skipping test that requires network access")
 	client := NewRpcClient(solana.RpcEndpointMainnetBeta)
-	reward, err := client.GetInflationReward([]solana.Pubkey{keypair.MustParsePubkey("9jxgosAfHgHzwnxsHw4RAZYaLVokMbnYtmiZBreynGFP")})
+	reward, err := client.GetInflationReward([]solana.Pubkey{solana.MustParsePubkey("9jxgosAfHgHzwnxsHw4RAZYaLVokMbnYtmiZBreynGFP")})
 	if err != nil {
 		t.Fatal(err)
 	}

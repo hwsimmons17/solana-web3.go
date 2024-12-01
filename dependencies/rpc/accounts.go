@@ -6,17 +6,16 @@ import (
 	"fmt"
 	"math/big"
 	"solana"
-	"solana/dependencies/keypair"
 )
 
 type encodedAccount struct {
-	Address    keypair.Pubkey `json:"address"`
-	Data       []byte         `json:"data"`
-	Executable bool           `json:"executable"`
-	Lamports   uint           `json:"lamports"`
-	Owner      keypair.Pubkey `json:"owner"`
-	RentEpoch  big.Int        `json:"rentEpoch"`
-	Space      int            `json:"space"`
+	Address    solana.PubkeyStr `json:"address"`
+	Data       []byte           `json:"data"`
+	Executable bool             `json:"executable"`
+	Lamports   uint             `json:"lamports"`
+	Owner      solana.PubkeyStr `json:"owner"`
+	RentEpoch  big.Int          `json:"rentEpoch"`
+	Space      int              `json:"space"`
 }
 
 func (a *encodedAccount) UnmarshalJSON(data []byte) error {
@@ -32,10 +31,11 @@ func (a *encodedAccount) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	a.Address = keypair.Pubkey(aux.Address)
+
+	a.Address = solana.PubkeyStr(aux.Address)
 	a.Executable = aux.Executable
 	a.Lamports = uint(aux.Lamports)
-	a.Owner = keypair.Pubkey(aux.Owner)
+	a.Owner = solana.PubkeyStr(aux.Owner)
 	a.RentEpoch = aux.RentEpoch
 	a.Space = aux.Space
 	if len(aux.Data) != 2 {
@@ -167,7 +167,10 @@ func (r *RpcClient) GetMultipleAccounts(pubkeys []solana.Pubkey, config ...solan
 }
 
 func (r *RpcClient) GetProgramAccounts(programPubkey solana.Pubkey, config ...solana.GetAccountInfoConfig) ([]solana.Account, error) {
-	var res []encodedAccount
+	var res []struct {
+		Account encodedAccount   `json:"account"`
+		Pubkey  solana.PubkeyStr `json:"pubkey"`
+	}
 
 	//Set the encoding to base64 no matter what
 	encoding := solana.EncodingBase64
@@ -185,13 +188,13 @@ func (r *RpcClient) GetProgramAccounts(programPubkey solana.Pubkey, config ...so
 	var accounts []solana.Account
 	for _, account := range res {
 		accounts = append(accounts, solana.Account{
-			Address:    &account.Address,
-			Data:       account.Data,
-			Executable: account.Executable,
-			Lamports:   account.Lamports,
-			Owner:      &account.Owner,
-			RentEpoch:  account.RentEpoch,
-			Space:      account.Space,
+			Address:    &account.Pubkey,
+			Data:       account.Account.Data,
+			Executable: account.Account.Executable,
+			Lamports:   account.Account.Lamports,
+			Owner:      &account.Account.Owner,
+			RentEpoch:  account.Account.RentEpoch,
+			Space:      account.Account.Space,
 		})
 	}
 

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"solana"
-	"solana/dependencies/keypair"
 )
 
 type RpcClient struct {
@@ -43,7 +42,7 @@ func (r *RpcClient) GetHealth() error {
 
 func (r *RpcClient) GetIdentity() (solana.Pubkey, error) {
 	var res struct {
-		Identity keypair.Pubkey `json:"identity"`
+		Identity solana.PubkeyStr `json:"identity"`
 	}
 	if err := r.send("getIdentity", nil, &res); err != nil {
 		return nil, err
