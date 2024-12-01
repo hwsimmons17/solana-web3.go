@@ -1,19 +1,61 @@
 package solana
 
-type TransactionWithMeta struct {
-	Meta        *TransactionMeta `json:"meta"`
-	Version     *int             `json:"version"` //Transaction version. Undefined if maxSupportedTransactionVersion is not set in request params. --note can also be "legacy"
-	Transaction RawTransaction   `json:"transaction"`
+type Transaction struct {
+	Signatures []string `json:"signatures"`
+	Message    Message  `json:"message"`
 }
 
-type Transaction struct {
-	Signatures []string           `json:"signatures"`
-	Message    TransactionMessage `json:"message"`
+type Message struct {
+	Instructions    []Instruction `json:"instructions"`
+	RecentBlockhash string        `json:"recentBlockhash"`
+}
+
+type Instruction struct {
+	Accounts  []InstructionAccount `json:"accounts"`
+	Data      []byte               `json:"data"`
+	ProgramID Pubkey               `json:"programId"`
+}
+
+type InstructionAccount struct {
+	Pubkey   Pubkey `json:"pubkey"`   //Public key of the account
+	Signer   bool   `json:"signer"`   //Boolean indicating if the account is a signer
+	Writable bool   `json:"writable"` //Boolean indicating if the account is writable
 }
 
 type RawTransaction struct {
-	Message    RawTransactionMessage `json:"message"`
-	Signatures []string              `json:"signatures"`
+	Message    RawMessage `json:"message"`
+	Signatures []string   `json:"signatures"`
+}
+
+type RawMessage struct {
+	AccountKeys     []Pubkey         `json:"accountKeys"`
+	Header          MessageHeader    `json:"header"`
+	Instructions    []RawInstruction `json:"instructions"`
+	RecentBlockhash string           `json:"recentBlockhash"`
+}
+
+type MessageHeader struct {
+	NumReadonlySignedAccounts   int `json:"numReadonlySignedAccounts"`
+	NumReadonlyUnsignedAccounts int `json:"numReadonlyUnsignedAccounts"`
+	NumRequiredSignatures       int `json:"numRequiredSignatures"`
+}
+
+type RawInstruction struct {
+	Accounts       []int  `json:"accounts"`
+	Data           []byte `json:"data"`
+	ProgramIDIndex int    `json:"programIdIndex"`
+}
+
+type TransactionWithMeta struct {
+	Meta        *TransactionMeta `json:"meta"`
+	Version     *int             `json:"version"` //Transaction version. Undefined if maxSupportedTransactionVersion is not set in request params. --note can also be "legacy"
+	Transaction Transaction      `json:"transaction"`
+}
+
+type RawTransactionWithMeta struct {
+	Meta        *TransactionMeta `json:"meta"`
+	Version     *int             `json:"version"` //Transaction version. Undefined if maxSupportedTransactionVersion is not set in request params. --note can also be "legacy"
+	Transaction RawTransaction   `json:"transaction"`
 }
 
 type TransactionMeta struct {
@@ -32,69 +74,10 @@ type TransactionMeta struct {
 	ComputeUnitsConsumed *uint                  `json:"computeUnitsConsumed"` //The number of compute units consumed during the execution of the transaction
 }
 
-type RawTransactionMessage struct {
-	AccountKeys     []Pubkey          `json:"accountKeys"`
-	Header          TransactionHeader `json:"header"`
-	Instructions    []RawInstruction  `json:"instructions"`
-	RecentBlockhash string            `json:"recentBlockhash"`
-}
-
-type TransactionMessage struct {
-	Instructions    []Instruction `json:"instructions"`
-	RecentBlockhash string        `json:"recentBlockhash"`
-}
-
-type RawInstruction struct {
-	Accounts       []int  `json:"accounts"`
-	Data           []byte `json:"data"`
-	ProgramIDIndex int    `json:"programIdIndex"`
-}
-
-type Instruction struct {
-	Accounts  []InstructionAccount `json:"accounts"`
-	Data      []byte               `json:"data"`
-	ProgramID Pubkey               `json:"programId"`
-}
-
-type InstructionAccount struct {
-	Pubkey   Pubkey `json:"pubkey"`   //Public key of the account
-	Signer   bool   `json:"signer"`   //Boolean indicating if the account is a signer
-	Writable bool   `json:"writable"` //Boolean indicating if the account is writable
-}
-
-type TransactionHeader struct {
-	NumReadonlySignedAccounts   int `json:"numReadonlySignedAccounts"`
-	NumReadonlyUnsignedAccounts int `json:"numReadonlyUnsignedAccounts"`
-	NumRequiredSignatures       int `json:"numRequiredSignatures"`
-}
-
 // The Solana runtime records the cross-program instructions that are invoked during transaction processing and makes these available for greater transparency of what was executed on-chain per transaction instruction. Invoked instructions are grouped by the originating transaction instruction and are listed in order of processing.
 type InnerInstructions struct {
 	Index        int              `json:"index"`        //Index of the transaction instruction from which the inner instruction(s) originated
 	Instructions []RawInstruction `json:"instructions"` //Ordered list of inner program instructions that were invoked during a single transaction instruction.
-}
-
-type TransactionReward struct {
-	Pubkey      string      `json:"pubkey"`      //The public key, as base-58 encoded string, of the account that received the reward
-	Lamports    int         `json:"lamports"`    //number of reward lamports credited or debited by the account, as a i64
-	PostBalance uint        `json:"postBalance"` //Account balance in lamports after the reward was applied
-	RewardType  *RewardType `json:"rewardType"`  //Type of reward: "fee", "rent", "voting", "staking"
-	Commission  *uint       `json:"commission"`  //Vote account commission when the reward was credited, only present for voting and staking rewards
-}
-
-type RewardType string
-
-const (
-	RewardTypeFee     RewardType = "fee"
-	RewardTypeRent    RewardType = "rent"
-	RewardTypeVoting  RewardType = "voting"
-	RewardTypeStaking RewardType = "staking"
-)
-
-// Deprecated: Transaction status
-type TransactionStatus struct {
-	Ok  any `json:"Ok"`
-	Err any `json:"Err"`
 }
 
 type LoadedAddresses struct {
@@ -105,9 +88,4 @@ type LoadedAddresses struct {
 type TransactionReturnData struct {
 	ProgramID string `json:"programId"` //The program that generated the return data, as base-58 encoded Pubkey
 	Data      string `json:"data"`      //the return data itself, as base-64 encoded binary data
-}
-
-type LatestBlockhash struct {
-	Blockhash            string `json:"blockhash"`            //A Hash as base-58 encoded string
-	LastValidBlockHeight uint   `json:"lastValidBlockHeight"` //Last block height at which the blockhash will be valid
 }

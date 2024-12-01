@@ -37,9 +37,9 @@ func ParseTransactionData(data []byte) (solana.RawTransaction, error) {
 
 	return solana.RawTransaction{
 		Signatures: signatures,
-		Message: solana.RawTransactionMessage{
+		Message: solana.RawMessage{
 			AccountKeys: accounts,
-			Header: solana.TransactionHeader{
+			Header: solana.MessageHeader{
 				NumRequiredSignatures:       numRequiredSignatures,
 				NumReadonlySignedAccounts:   numReadonlySignedAccounts,
 				NumReadonlyUnsignedAccounts: numReadonlyUnsignedAccounts,

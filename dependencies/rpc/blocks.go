@@ -39,7 +39,7 @@ func (r *RpcClient) GetBlock(slotNumber uint, config ...solana.GetBlockConfig) (
 		return nil, nil
 	}
 
-	var txs []solana.TransactionWithMeta
+	var txs []solana.RawTransactionWithMeta
 	for _, encodedTransaction := range res.Transactions {
 		if len(encodedTransaction.Transaction) == 0 {
 			return nil, errors.New("transaction not found")
@@ -53,7 +53,7 @@ func (r *RpcClient) GetBlock(slotNumber uint, config ...solana.GetBlockConfig) (
 			return nil, fmt.Errorf("failed to parse transaction data: %v", err)
 		}
 
-		txs = append(txs, solana.TransactionWithMeta{
+		txs = append(txs, solana.RawTransactionWithMeta{
 			Meta:        encodedTransaction.Meta,
 			Version:     encodedTransaction.Version,
 			Transaction: transaction,

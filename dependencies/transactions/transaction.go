@@ -13,7 +13,7 @@ func RawTransaction(tx solana.Transaction) solana.RawTransaction {
 
 	accountKeys, header := populateAccountKeys(tx.Message)
 
-	rawTransaction.Message = solana.RawTransactionMessage{
+	rawTransaction.Message = solana.RawMessage{
 		AccountKeys:     accountKeys,
 		Header:          header,
 		Instructions:    getInstructions(tx.Message.Instructions, accountKeys),
@@ -23,7 +23,7 @@ func RawTransaction(tx solana.Transaction) solana.RawTransaction {
 	return rawTransaction
 }
 
-func populateAccountKeys(msg solana.TransactionMessage) ([]solana.Pubkey, solana.TransactionHeader) {
+func populateAccountKeys(msg solana.Message) ([]solana.Pubkey, solana.MessageHeader) {
 	var accountKeys []solana.Pubkey
 	var readOnlySigned int
 	var readOnlyUnsigned int
@@ -72,7 +72,7 @@ func populateAccountKeys(msg solana.TransactionMessage) ([]solana.Pubkey, solana
 			accountKeys = append(accountKeys, instruction.ProgramID)
 		}
 	}
-	return accountKeys, solana.TransactionHeader{
+	return accountKeys, solana.MessageHeader{
 		NumReadonlySignedAccounts:   readOnlySigned,
 		NumReadonlyUnsignedAccounts: readOnlyUnsigned,
 		NumRequiredSignatures:       signers,
@@ -136,14 +136,14 @@ func Transaction(rawTx solana.RawTransaction) (solana.Transaction, error) {
 
 	return solana.Transaction{
 		Signatures: rawTx.Signatures,
-		Message: solana.TransactionMessage{
+		Message: solana.Message{
 			Instructions:    instructions,
 			RecentBlockhash: rawTx.Message.RecentBlockhash,
 		},
 	}, nil
 }
 
-func getInstructionAccounts(accountKeys []solana.Pubkey, header solana.TransactionHeader) []solana.InstructionAccount {
+func getInstructionAccounts(accountKeys []solana.Pubkey, header solana.MessageHeader) []solana.InstructionAccount {
 	accounts := make([]solana.InstructionAccount, len(accountKeys))
 	for i, key := range accountKeys {
 		accounts[i] = solana.InstructionAccount{

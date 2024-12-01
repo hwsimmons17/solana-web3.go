@@ -68,7 +68,7 @@ func (r *RpcClient) GetSignaturesForAddress(address solana.Pubkey, config ...sol
 	return res, nil
 }
 
-func (r *RpcClient) GetTransaction(transactionSignature string, config ...solana.GetTransactionSignatureConfig) (*solana.TransactionWithMeta, error) {
+func (r *RpcClient) GetTransaction(transactionSignature string, config ...solana.GetTransactionSignatureConfig) (*solana.RawTransactionWithMeta, error) {
 	var res *encodedTransaction
 	params := []interface{}{transactionSignature}
 	encoding := solana.EncodingBase64
@@ -96,7 +96,7 @@ func (r *RpcClient) GetTransaction(transactionSignature string, config ...solana
 		return nil, fmt.Errorf("failed to parse transaction data: %v", err)
 	}
 
-	return &solana.TransactionWithMeta{
+	return &solana.RawTransactionWithMeta{
 		Meta:        res.Meta,
 		Version:     res.Version,
 		Transaction: transaction,

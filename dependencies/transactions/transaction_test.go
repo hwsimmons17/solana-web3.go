@@ -8,7 +8,7 @@ import (
 func TestRawTransaction(t *testing.T) {
 	tx := solana.Transaction{
 		Signatures: []string{"5WUMzKkDaSuLUj3RpbufHi2PLRPgkjkHhsJpLE7Q3a3fMNDkV579zDmWLfMTnw4my5cbHKicRhYDTQsoAidv8nYD"},
-		Message: solana.TransactionMessage{
+		Message: solana.Message{
 			Instructions: []solana.Instruction{
 				{
 					Accounts: []solana.InstructionAccount{
@@ -38,13 +38,13 @@ func TestRawTransaction(t *testing.T) {
 
 func TestTransaction(t *testing.T) {
 	rawTx := solana.RawTransaction{
-		Message: solana.RawTransactionMessage{
+		Message: solana.RawMessage{
 			AccountKeys: []solana.Pubkey{
 				solana.MustParsePubkey("BrX9Z85BbmXYMjvvuAWU8imwsAqutVQiDg9uNfTGkzrJ"),
 				solana.MustParsePubkey("2u83Dx5qPV4QnujjJQv8v2SoqG1ixuAxPK5Jwhtkovd1"),
 				solana.MustParsePubkey("Vote111111111111111111111111111111111111111"),
 			},
-			Header: solana.TransactionHeader{
+			Header: solana.MessageHeader{
 				NumReadonlySignedAccounts:   0,
 				NumReadonlyUnsignedAccounts: 1,
 				NumRequiredSignatures:       1,
