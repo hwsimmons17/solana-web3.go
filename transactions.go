@@ -235,34 +235,42 @@ func parseInstruction(data []byte) (RawInstruction, []byte, error) {
 	}, data, nil
 }
 
-func (transaction RawTransaction) Data() ([]byte, error) {
+func (transaction RawTransaction) Bytes() ([]byte, error) {
 	signaturesData, err := getSignaturesData(transaction.Signatures)
 	if err != nil {
 		return nil, err
 	}
+	messageData, err := transaction.Message.Bytes()
+	if err != nil {
+		return nil, err
+	}
 
+	return append(signaturesData, messageData...), nil
+}
+
+func (message RawMessage) Bytes() ([]byte, error) {
 	messageHeaderData := []byte{
-		byte(transaction.Message.Header.NumRequiredSignatures),
-		byte(transaction.Message.Header.NumReadonlySignedAccounts),
-		byte(transaction.Message.Header.NumReadonlyUnsignedAccounts),
+		byte(message.Header.NumRequiredSignatures),
+		byte(message.Header.NumReadonlySignedAccounts),
+		byte(message.Header.NumReadonlyUnsignedAccounts),
 	}
 
-	accountsData, err := getAccountsData(transaction.Message.AccountKeys)
+	accountsData, err := getAccountsData(message.AccountKeys)
 	if err != nil {
 		return nil, err
 	}
 
-	recentBlockhashData, err := getRecentBlockhashData(transaction.Message.RecentBlockhash)
+	recentBlockhashData, err := getRecentBlockhashData(message.RecentBlockhash)
 	if err != nil {
 		return nil, err
 	}
 
-	instructionsData, err := getInstructionsData(transaction.Message.Instructions)
+	instructionsData, err := getInstructionsData(message.Instructions)
 	if err != nil {
 		return nil, err
 	}
 
-	return append(append(append(append(signaturesData, messageHeaderData...), accountsData...), recentBlockhashData...), instructionsData...), nil
+	return append(append(append(messageHeaderData, accountsData...), recentBlockhashData...), instructionsData...), nil
 }
 
 func getSignaturesData(signatures []string) ([]byte, error) {
@@ -318,7 +326,7 @@ func getInstructionData(instruction RawInstruction) ([]byte, error) {
 	return instructionData, nil
 }
 
-func (tx Transaction) RawTransaction() RawTransaction {
+func (tx Transaction) Serialize() RawTransaction {
 	rawTransaction := RawTransaction{
 		Signatures: tx.Signatures,
 	}
@@ -465,4 +473,28 @@ func getInstructionAccounts(accountKeys []Pubkey, header MessageHeader) []Accoun
 		}
 	}
 	return accounts
+}
+
+func (rawTx *RawTransaction) Sign(signer Signer) error {
+	data, err := rawTx.Message.Bytes()
+	if err != nil {
+		return err
+	}
+	signatureBytes, err := signer.Sign(data)
+	if err != nil {
+		return err
+	}
+	signature := base58.Encode(signatureBytes)
+	rawTx.Signatures = append(rawTx.Signatures, signature)
+	return nil
+}
+
+func (tx *Transaction) Sign(signer Signer) error {
+	rawTx := tx.Serialize()
+	if err := rawTx.Sign(signer); err != nil {
+		return err
+	}
+
+	tx.Signatures = rawTx.Signatures
+	return nil
 }

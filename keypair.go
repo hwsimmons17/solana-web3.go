@@ -21,7 +21,7 @@ type Pubkey interface {
 
 // Represents a keypair in the Solana blockchain.
 type Keypair struct {
-	PublicKey Pubkey `json:"publicKey"`
+	Pubkey
 	Signer
 }
 
@@ -43,8 +43,8 @@ func NewKeypair(privateKey []byte) (Keypair, error) {
 	}
 
 	return Keypair{
-		PublicKey: pubkey,
-		Signer:    signer,
+		Pubkey: pubkey,
+		Signer: signer,
 	}, nil
 }
 
@@ -65,8 +65,8 @@ func NewKeypairFromBase58(str string) (Keypair, error) {
 	}
 
 	return Keypair{
-		PublicKey: pubkey,
-		Signer:    signer,
+		Pubkey: pubkey,
+		Signer: signer,
 	}, nil
 }
 

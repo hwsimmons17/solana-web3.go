@@ -25,7 +25,7 @@ func TestToData(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	newData, err := transaction.Data()
+	newData, err := transaction.Bytes()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestRawTransaction(t *testing.T) {
 		},
 	}
 
-	rawTx := tx.RawTransaction()
+	rawTx := tx.Serialize()
 	if rawTx.Message.AccountKeys[0].String() != "BrX9Z85BbmXYMjvvuAWU8imwsAqutVQiDg9uNfTGkzrJ" {
 		t.Fatal("Unexpected account key")
 	}
