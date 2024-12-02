@@ -71,3 +71,15 @@ func (c *client) SendTransaction(transaction Transaction) (string, error) {
 	encoding := EncodingBase64
 	return c.rpc.SendTransaction(encodedTx, SendTransactionConfig{PreflightCommitment: &c.DefaultCommitment, Encoding: &encoding})
 }
+
+func (c *client) SendAndSignTransaction(transaction Transaction) (string, error) {
+	blockhash, err := c.RecentBlockhash()
+	if err != nil {
+		return "", err
+	}
+
+	transaction.Message.RecentBlockhash = blockhash
+	transaction.Sign(c)
+
+	return c.SendTransaction(transaction)
+}
