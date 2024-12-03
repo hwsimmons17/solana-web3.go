@@ -1,6 +1,8 @@
 package solana
 
-import "github.com/near/borsh-go"
+import (
+	"github.com/near/borsh-go"
+)
 
 var (
 	// Native programs
@@ -16,19 +18,7 @@ var (
 )
 
 type SystemProgramIxs interface {
-	// CreateAccount(fundingAccount Pubkey, newAccount Pubkey, lamports uint, space uint, programOwner Pubkey) Instruction
-	// Assign(assignedAccount Pubkey, programOwner Pubkey) Instruction
 	Transfer(source Pubkey, destination Pubkey, lamports uint) Instruction
-	// CreateAccountWithSeed(fundingAccount Pubkey, createdAccount Pubkey, base Pubkey, seed string, lamports uint, space uint, programOwner Pubkey) Instruction
-	// AdvanceNonceAccount(nonceAccount Pubkey, nonceAuthority Pubkey) Instruction
-	// WithdrawNonceAccount(nonceAccount Pubkey, destination Pubkey, nonceAuthority Pubkey, lamports uint) Instruction
-	// InitializeNonceAccount(nonceAccount Pubkey, nonceAuthority Pubkey) Instruction
-	// AuthorizeNonceAccount(nonceAccount Pubkey, nonceAuthority Pubkey, newAuthority Pubkey) Instruction
-	// Allocate(allocatedAccount Pubkey, space uint) Instruction
-	// AllocateWithSeed(allocatedAccount Pubkey, base Pubkey, seed string, space uint, programOwner Pubkey) Instruction
-	// AssignWithSeed(assignedAccount Pubkey, base Pubkey, seed string, programOwner Pubkey) Instruction
-	// TransferWithSeed(source Pubkey, base Pubkey, destination Pubkey, lamports uint, fromSeed string, fromOwner Pubkey) Instruction
-	// UpgradeNonceAccount(nonceAccount Pubkey, nonceAuthority Pubkey) Instruction
 }
 
 func SystemProgramInstructions() SystemProgramIxs {
@@ -39,12 +29,13 @@ type systemProgramIxs struct{}
 
 func (systemProgramIxs) Transfer(source Pubkey, destination Pubkey, lamports uint) Instruction {
 	data, _ := borsh.Serialize(struct {
-		Instruction uint8
+		Instruction uint32
 		Lamports    uint64
 	}{
 		Instruction: 2,
 		Lamports:    uint64(lamports),
 	})
+
 	return Instruction{
 		ProgramID: SystemProgram,
 		Data:      data,

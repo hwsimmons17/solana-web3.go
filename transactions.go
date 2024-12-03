@@ -7,6 +7,10 @@ import (
 	"github.com/mr-tron/base58"
 )
 
+func SolInLamports(lamports uint) uint {
+	return lamports * uint(1_000_000_000)
+}
+
 type Transaction struct {
 	Signatures []string `json:"signatures"`
 	Message    Message  `json:"message"`

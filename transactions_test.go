@@ -134,5 +134,7 @@ func TestRawTxToTransaction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Fatalf("%+v", tx)
+	if tx.Message.RecentBlockhash != "FLwNEQozzqBBaeHf17JA83PUi3GPEJZkneDm548wMUSj" {
+		t.Fatal("Unexpected recent blockhash")
+	}
 }

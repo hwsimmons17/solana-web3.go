@@ -1,6 +1,8 @@
 package solana
 
-import "encoding/base64"
+import (
+	"encoding/base64"
+)
 
 type Client interface {
 	GetAccountInfo(pubkey Pubkey) (*Account, error)
@@ -45,7 +47,7 @@ func (c *client) GetProgramAccounts(programId Pubkey) ([]Account, error) {
 }
 
 func (c *client) RequestAirdrop(pubkey Pubkey, lamports uint) (string, error) {
-	return c.rpc.RequestAirdrop(pubkey, lamports, StandardCommitmentConfig{Commitment: &c.DefaultCommitment})
+	return c.rpc.RequestAirdrop(pubkey, lamports)
 }
 
 func (c *client) GetTokenAccountBalance(pubkey Pubkey) (UiTokenAmount, error) {
