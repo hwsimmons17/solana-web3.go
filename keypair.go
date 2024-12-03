@@ -4,7 +4,9 @@ import (
 	"crypto"
 	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/sha256"
 	"errors"
+	"math"
 
 	"filippo.io/edwards25519"
 	"github.com/mr-tron/base58"
@@ -166,4 +168,49 @@ func (s *signer) Sign(message []byte) ([]byte, error) {
 		return nil, err
 	}
 	return signData, nil
+}
+
+const PDA_MARKER = "ProgramDerivedAddress"
+
+// Find a valid program address and its corresponding bump seed.
+func Pda(seed [][]byte, programID Pubkey) (Pubkey, uint8, error) {
+	var address Pubkey
+	var err error
+	bumpSeed := uint8(math.MaxUint8)
+	for bumpSeed != 0 {
+		address, err = generatePdaCandidate(append(seed, []byte{byte(bumpSeed)}), programID)
+		if err == nil {
+			return address, bumpSeed, nil
+		}
+		if err.Error() != "PDA candidate is on the ed25519 curve" {
+			return nil, bumpSeed, err
+		}
+		bumpSeed--
+	}
+	return nil, bumpSeed, errors.New("unable to find a valid program address")
+}
+func generatePdaCandidate(seeds [][]byte, programID Pubkey) (Pubkey, error) {
+	if len(seeds) > 16 {
+		return nil, errors.New("too many seeds, expected 16 or fewer")
+	}
+	for _, seed := range seeds {
+		if len(seed) > 16 {
+			return nil, errors.New("too many seeds, expected 16 or fewer")
+		}
+	}
+	buf := []byte{}
+	for _, seed := range seeds {
+		buf = append(buf, seed...)
+	}
+	buf = append(buf, programID.Bytes()[:]...)
+	buf = append(buf, []byte(PDA_MARKER)...)
+	hash := sha256.Sum256(buf)
+	pdaCandidate, err := ParsePubkeyBytes(hash[:])
+	if err != nil {
+		return nil, err
+	}
+	if pdaCandidate.IsOnCurve() {
+		return nil, errors.New("PDA candidate is on the ed25519 curve")
+	}
+	return pdaCandidate, nil
 }

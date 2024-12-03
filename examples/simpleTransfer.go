@@ -3,9 +3,9 @@ package examples
 import (
 	"log"
 	"os"
-	"solana"
-	"solana/rpc"
 
+	"github.com/hwsimmons17/solana-web3.go"
+	"github.com/hwsimmons17/solana-web3.go/rpc"
 	"github.com/joho/godotenv"
 )
 

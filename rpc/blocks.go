@@ -4,8 +4,9 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"solana"
 	"time"
+
+	"github.com/hwsimmons17/solana-web3.go"
 )
 
 type block struct {

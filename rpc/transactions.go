@@ -4,7 +4,8 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"solana"
+
+	"github.com/hwsimmons17/solana-web3.go"
 )
 
 type encodedTransaction struct {

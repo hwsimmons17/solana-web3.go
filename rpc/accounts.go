@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"solana"
+
+	"github.com/hwsimmons17/solana-web3.go"
 )
 
 type encodedAccount struct {

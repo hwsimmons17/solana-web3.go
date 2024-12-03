@@ -1,6 +1,6 @@
 package rpc
 
-import "solana"
+import "github.com/hwsimmons17/solana-web3.go"
 
 func (r *RpcClient) GetInflationGovernor(config ...solana.StandardCommitmentConfig) (solana.InflationGovernor, error) {
 	var res solana.InflationGovernor

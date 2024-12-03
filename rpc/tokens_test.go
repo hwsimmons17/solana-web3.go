@@ -1,8 +1,9 @@
 package rpc
 
 import (
-	"solana"
 	"testing"
+
+	"github.com/hwsimmons17/solana-web3.go"
 )
 
 func TestGetTokenAccountBalance(t *testing.T) {

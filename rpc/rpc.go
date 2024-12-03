@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/hwsimmons17/solana-web3.go"
 	"net/http"
-	"solana"
 )
 
 type RpcClient struct {

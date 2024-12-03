@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"solana"
+	"github.com/hwsimmons17/solana-web3.go"
 )
 
 func (r *RpcClient) GetTokenAccountBalance(address solana.Pubkey, config ...solana.StandardCommitmentConfig) (solana.UiTokenAmount, error) {
