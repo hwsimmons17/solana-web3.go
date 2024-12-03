@@ -25,6 +25,7 @@ func SimpleTransfer() {
 		},
 	}
 
+	//SendAndSignTransaction signs the transaction with the Client's default signer and handles getting the recent blockhash
 	if txStr, err := client.SendAndSignTransaction(tx); err != nil {
 		log.Println(txStr)
 		panic(err)
