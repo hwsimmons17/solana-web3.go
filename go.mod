@@ -1,4 +1,4 @@
-module solana
+module github.com/hwsimmons17/solana-web3.go
 
 go 1.23.3
 
