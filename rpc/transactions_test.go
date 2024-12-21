@@ -41,12 +41,18 @@ func TestGetSignatureStatuses(t *testing.T) {
 
 func TestGetSignaturesForAddress(t *testing.T) {
 	t.Skip("Skipping test that requires network access")
-	client := NewRpcClient(solana.RpcEndpointDevnet)
-	signatures, err := client.GetSignaturesForAddress(solana.MustParsePubkey("7Fg8XQBVY4z7gPzecGo7abbHZbHj3iFfGozXsz1VcvKk"))
+	client := NewRpcClient(solana.RpcEndpointMainnetBeta)
+	_, err := client.GetSignaturesForAddress(solana.MustParsePubkey("7Fg8XQBVY4z7gPzecGo7abbHZbHj3iFfGozXsz1VcvKk"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Fatal(signatures)
+	if _, err := client.GetSignaturesForAddress(solana.MustParsePubkey("7Fg8XQBVY4z7gPzecGo7abbHZbHj3iFfGozXsz1VcvKk")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := client.GetSignaturesForAddress(solana.MustParsePubkey("7Fg8XQBVY4z7gPzecGo7abbHZbHj3iFfGozXsz1VcvKk")); err != nil {
+		t.Fatal(err)
+	}
+	// t.Fatal(signatures)
 }
 
 func TestGetTransaction(t *testing.T) {

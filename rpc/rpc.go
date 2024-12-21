@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/hwsimmons17/solana-web3.go"
 	"net/http"
+	"time"
+
+	"github.com/hwsimmons17/solana-web3.go"
 )
 
 type RpcClient struct {
@@ -126,6 +128,13 @@ func (r *RpcClient) send(method string, params []interface{}, res interface{}) e
 	}
 
 	if result.Error != nil {
+		if result.Error.Code == 429 {
+			retryAfter, err := time.ParseDuration(resp.Header.Get("Retry-After") + "s")
+			if err == nil {
+				time.Sleep(retryAfter)
+				return r.send(method, params, res)
+			}
+		}
 		return fmt.Errorf("rpc request failed. Code: %d, Message: %s, Data: %v", result.Error.Code, result.Error.Message, result.Error.Data)
 	}
 
