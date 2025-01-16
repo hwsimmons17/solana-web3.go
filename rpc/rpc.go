@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -80,10 +81,10 @@ func (r *RpcClient) incrementID() {
 }
 
 type rpcReq struct {
-	ID      int           `json:"id"`
-	Jsonrpc string        `json:"jsonrpc"`
-	Method  string        `json:"method"`
-	Params  []interface{} `json:"params,omitempty"`
+	ID      int    `json:"id"`
+	Jsonrpc string `json:"jsonrpc"`
+	Method  string `json:"method"`
+	Params  any    `json:"params,omitempty"`
 }
 
 type rpcResp struct {
@@ -97,7 +98,7 @@ type rpcResp struct {
 	} `json:"error"`
 }
 
-func (r *RpcClient) send(method string, params []interface{}, res interface{}) error {
+func (r *RpcClient) send(method string, params any, res interface{}) error {
 	body := rpcReq{
 		ID:      r.ID,
 		Jsonrpc: "2.0",
@@ -110,6 +111,7 @@ func (r *RpcClient) send(method string, params []interface{}, res interface{}) e
 	if err != nil {
 		return err
 	}
+	log.Println(string(data))
 
 	client := http.Client{}
 	req, err := http.NewRequest(http.MethodPost, string(r.Endpoint), bytes.NewBuffer([]byte(data)))

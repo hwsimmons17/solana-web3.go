@@ -63,3 +63,13 @@ func TestGetTokenSupply(t *testing.T) {
 	}
 	t.Fatal(supply)
 }
+
+func TestGetAsset(t *testing.T) {
+	t.Skip("Skipping test that requires network access")
+	client := NewRpcClient(solana.RpcEndpointDevnet)
+	asset, err := client.GetAsset(solana.MustParsePubkey("4DL7ZA31rFtHgqneY8dGrXarYj2TyTkEpto5o3F2y9Fx"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Fatal(asset)
+}

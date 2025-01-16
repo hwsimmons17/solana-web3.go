@@ -1,6 +1,8 @@
 package rpc
 
 import (
+	"log"
+
 	"github.com/hwsimmons17/solana-web3.go"
 )
 
@@ -123,4 +125,24 @@ func (r *RpcClient) GetTokenSupply(mintAddress solana.Pubkey, config ...solana.S
 		return solana.UiTokenAmount{}, err
 	}
 	return res.Value, nil
+}
+
+func (r *RpcClient) GetAsset(pubkey solana.Pubkey, config ...solana.GetAssetConfig) (solana.GetAssetResult, error) {
+	var res solana.GetAssetResult
+
+	type getAssetParams struct {
+		ID             string                 `json:"id"`
+		DisplayOptions *solana.GetAssetConfig `json:"displayOptions,omitempty"`
+	}
+	params := getAssetParams{
+		ID: pubkey.String(),
+	}
+	if len(config) > 0 {
+		params.DisplayOptions = &config[0]
+	}
+	log.Println(params)
+	if err := r.send("getAsset", params, &res); err != nil {
+		return res, err
+	}
+	return res, nil
 }
