@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -111,7 +110,6 @@ func (r *RpcClient) send(method string, params any, res interface{}) error {
 	if err != nil {
 		return err
 	}
-	log.Println(string(data))
 
 	client := http.Client{}
 	req, err := http.NewRequest(http.MethodPost, string(r.Endpoint), bytes.NewBuffer([]byte(data)))
