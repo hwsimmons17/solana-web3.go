@@ -1,8 +1,6 @@
 package rpc
 
 import (
-	"log"
-
 	"github.com/hwsimmons17/solana-web3.go"
 )
 
@@ -140,7 +138,6 @@ func (r *RpcClient) GetAsset(pubkey solana.Pubkey, config ...solana.GetAssetConf
 	if len(config) > 0 {
 		params.DisplayOptions = &config[0]
 	}
-	log.Println(params)
 	if err := r.send("getAsset", params, &res); err != nil {
 		return res, err
 	}
